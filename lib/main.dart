@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:grad_project/providers/customer_provider.dart';
+import 'package:grad_project/providers/invoice_provider.dart';
+import 'package:grad_project/providers/login_provider.dart';
 import 'package:grad_project/screens/login_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        // Add providers here, e.g.:
+        ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => CustomerProvider()),
+        ChangeNotifierProvider(create: (_) => InvoiceProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
