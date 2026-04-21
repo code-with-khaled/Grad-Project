@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/screens/customer_details_screen.dart';
+import 'package:grad_project/screens/main%20screens/customers/customer_details_screen.dart';
 import 'package:provider/provider.dart';
-import '../providers/customer_provider.dart';
+import '../../../providers/customer_provider.dart';
 
 class CustomerListScreen extends StatefulWidget {
   const CustomerListScreen({super.key});

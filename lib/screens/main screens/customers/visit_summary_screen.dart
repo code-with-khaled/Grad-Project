@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/screens/invoice_summary_screen.dart';
-import '../models/customer.dart';
+import 'package:grad_project/screens/main%20screens/customers/invoice_summary_screen.dart';
+import '../../../models/customer.dart';
 
 class VisitSummaryScreen extends StatefulWidget {
   final Customer customer;

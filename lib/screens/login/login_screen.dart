@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'customer_list_screen.dart';
+import 'package:grad_project/screens/main%20screens/main_layout.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -33,9 +33,7 @@ class LoginScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const CustomerListScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const MainLayout()),
                 );
               },
               child: const Text('Login'),

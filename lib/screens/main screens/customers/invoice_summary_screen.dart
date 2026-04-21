@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/models/invoice_item.dart';
 import 'package:provider/provider.dart';
-import '../models/customer.dart';
-import '../providers/invoice_provider.dart';
+import '../../../models/customer.dart';
+import '../../../providers/invoice_provider.dart';
 
 class InvoiceSummaryScreen extends StatefulWidget {
   final Customer customer;
@@ -14,75 +13,6 @@ class InvoiceSummaryScreen extends StatefulWidget {
 }
 
 class _InvoiceSummaryScreenState extends State<InvoiceSummaryScreen> {
-  final mockItems = [
-    InvoiceItem(
-      productId: 101,
-      productName: "Bottled Water 1.5L",
-      quantity: 3,
-      price: 0.80,
-    ),
-    InvoiceItem(
-      productId: 102,
-      productName: "Orange Juice 1L",
-      quantity: 2,
-      price: 1.50,
-    ),
-    InvoiceItem(
-      productId: 103,
-      productName: "Chocolate Bar",
-      quantity: 5,
-      price: 0.60,
-    ),
-    InvoiceItem(
-      productId: 104,
-      productName: "Chips Family Pack",
-      quantity: 1,
-      price: 2.20,
-    ),
-    InvoiceItem(
-      productId: 105,
-      productName: "Instant Coffee 200g",
-      quantity: 1,
-      price: 4.75,
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.microtask(() {
-      final invoiceProvider = context.read<InvoiceProvider>();
-
-      invoiceProvider.addItem(
-        InvoiceItem(
-          productId: 101,
-          productName: "Bottled Water 1.5L",
-          quantity: 3,
-          price: 0.80,
-        ),
-      );
-
-      invoiceProvider.addItem(
-        InvoiceItem(
-          productId: 102,
-          productName: "Orange Juice 1L",
-          quantity: 2,
-          price: 1.50,
-        ),
-      );
-
-      invoiceProvider.addItem(
-        InvoiceItem(
-          productId: 103,
-          productName: "Chocolate Bar",
-          quantity: 5,
-          price: 0.60,
-        ),
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final invoiceProvider = context.watch<InvoiceProvider>();

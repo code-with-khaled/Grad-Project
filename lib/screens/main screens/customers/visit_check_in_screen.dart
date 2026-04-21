@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/screens/visit_summary_screen.dart';
-import '../models/customer.dart';
+import 'package:grad_project/screens/main%20screens/customers/visit_summary_screen.dart';
+import '../../../models/customer.dart';
 
 class VisitCheckInScreen extends StatelessWidget {
   final Customer customer;
