@@ -20,12 +20,16 @@ class CustomerProvider extends ChangeNotifier {
         name: 'John Doe',
         address: '123 Main St',
         phone: '123-456-7890',
+        lat: 33.5138,
+        lng: 36.2765,
       ),
       Customer(
         id: 2,
         name: 'Jane Smith',
         address: '456 Elm St',
         phone: '987-654-3210',
+        lat: 33.5190,
+        lng: 36.2800,
       ),
     ];
 

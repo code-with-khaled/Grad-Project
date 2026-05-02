@@ -1,38 +1,47 @@
-import 'package:flutter/material.dart';
-import '../models/route_plan.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
+import '../models/customer.dart';
 
 class RoutePlanProvider extends ChangeNotifier {
-  RoutePlan? _todayPlan;
+  List<LatLng> routePoints = [];
+  bool isLoading = false;
+  String? errorMessage;
 
-  RoutePlan? get todayPlan => _todayPlan;
+  Future<void> fetchRoute(List<Customer> customers) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
 
-  // Hardcoded plan for now
-  void loadMockPlan() {
-    _todayPlan = RoutePlan(
-      date: DateTime.now(),
-      customerIds: [3, 1, 5, 2, 4], // ordered manually
-      isAutoOptimized: false,
-    );
-    notifyListeners();
-  }
+      final coords = customers.map((c) => [c.lng, c.lat]).toList();
 
-  // Later: manager-defined plan
-  void setManualPlan(List<int> orderedCustomerIds) {
-    _todayPlan = RoutePlan(
-      date: DateTime.now(),
-      customerIds: orderedCustomerIds,
-      isAutoOptimized: false,
-    );
-    notifyListeners();
-  }
+      final url = Uri.parse(
+        "https://api.openrouteservice.org/v2/directions/driving-car/geojson",
+      );
 
-  // Later: system-optimized plan
-  void setAutoOptimizedPlan(List<int> orderedCustomerIds) {
-    _todayPlan = RoutePlan(
-      date: DateTime.now(),
-      customerIds: orderedCustomerIds,
-      isAutoOptimized: true,
-    );
-    notifyListeners();
+      final response = await http.post(
+        url,
+        headers: {
+          "Authorization":
+              "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjliZjQ2YmM1ODQ5NjQ0MTNiZGU0ZWYyMzBiYWRlNDY1IiwiaCI6Im11cm11cjY0In0=",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"coordinates": coords}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      final List<dynamic> points =
+          data["features"][0]["geometry"]["coordinates"];
+
+      routePoints = points.map((p) => LatLng(p[1], p[0])).toList();
+    } catch (e) {
+      errorMessage = "Failed to load route";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }
