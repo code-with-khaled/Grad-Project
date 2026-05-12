@@ -16,18 +16,18 @@ class CustomerProvider extends ChangeNotifier {
     await Future.delayed(Duration(seconds: 2));
     _customers = [
       Customer(
+        name: "Customer 1",
         id: 1,
-        name: 'John Doe',
-        address: '123 Main St',
-        phone: '123-456-7890',
+        address: "Address 1",
+        phone: "Phone 1",
         lat: 33.5138,
         lng: 36.2765,
       ),
       Customer(
+        name: "Customer 2",
         id: 2,
-        name: 'Jane Smith',
-        address: '456 Elm St',
-        phone: '987-654-3210',
+        address: "Address 2",
+        phone: "Phone 2",
         lat: 33.5190,
         lng: 36.2800,
       ),
