@@ -3,6 +3,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:grad_project/models/customer.dart';
 import 'package:grad_project/providers/customer_provider.dart';
 import 'package:grad_project/providers/route_plan_provider.dart';
+import 'package:grad_project/providers/visit_provider.dart';
+import 'package:grad_project/screens/main%20screens/visits/visit_summury_screen.dart';
+import 'package:grad_project/services/location_service.dart';
 import 'package:grad_project/widgets/numbered_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -107,7 +110,23 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    Navigator.pop(context); // close bottom sheet
+
+                    final visitProvider = context.read<VisitProvider>();
+                    final navigator = Navigator.of(context);
+
+                    final gps = await LocationService.getCurrentLocation();
+
+                    visitProvider.startVisit(c, gps);
+
+                    navigator.push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            VisitSummaryScreen(customer: c, order: order),
+                      ),
+                    );
+                  },
                   child: Text("Start Visit"),
                 ),
               ),

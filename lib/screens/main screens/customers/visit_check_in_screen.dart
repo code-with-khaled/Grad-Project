@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/screens/main%20screens/customers/visit_summary_screen.dart';
+import 'package:grad_project/screens/main%20screens/visits/visit_summury_screen.dart';
 import '../../../models/customer.dart';
 
 class VisitCheckInScreen extends StatelessWidget {
@@ -63,7 +63,8 @@ class VisitCheckInScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => VisitSummaryScreen(customer: customer),
+                      builder: (_) =>
+                          VisitSummaryScreen(customer: customer, order: 1),
                     ),
                   );
                 },
