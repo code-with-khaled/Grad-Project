@@ -5,6 +5,7 @@ class Customer {
   final String phone;
   final double lat;
   final double lng;
+  bool visited;
 
   Customer({
     required this.id,
@@ -13,5 +14,6 @@ class Customer {
     required this.phone,
     required this.lat,
     required this.lng,
+    this.visited = false,
   });
 }

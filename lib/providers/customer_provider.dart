@@ -36,4 +36,12 @@ class CustomerProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  void markVisited(int customerId) {
+    final index = _customers.indexWhere((c) => c.id == customerId);
+    if (index != -1) {
+      _customers[index].visited = true;
+      notifyListeners();
+    }
+  }
 }

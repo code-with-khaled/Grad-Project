@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:grad_project/models/visit_model.dart';
+import 'package:grad_project/providers/customer_provider.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/customer.dart';
 
@@ -27,13 +28,15 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void finishVisit(LatLng gps) {
+  void finishVisit(LatLng gps, CustomerProvider customerProvider) {
     if (currentVisit == null) return;
 
     currentVisit!.endTime = DateTime.now();
     currentVisit!.endLat = gps.latitude;
     currentVisit!.endLng = gps.longitude;
     currentVisit!.status = "completed";
+
+    customerProvider.markVisited(currentVisit!.customerId);
 
     notifyListeners();
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:grad_project/models/customer.dart';
+import 'package:grad_project/providers/customer_provider.dart';
 import 'package:grad_project/providers/visit_provider.dart';
 import 'package:grad_project/services/location_service.dart';
 import 'package:provider/provider.dart';
@@ -100,11 +101,13 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   final visitProvider = context.read<VisitProvider>();
+                  final customerProvider = context.read<CustomerProvider>();
                   final navigator = Navigator.of(context);
 
                   final gps = await LocationService.getCurrentLocation();
 
-                  visitProvider.finishVisit(gps);
+                  visitProvider.finishVisit(gps, customerProvider);
+
                   final data = visitProvider.visitData;
 
                   navigator.push(

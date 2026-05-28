@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class NumberedMarker extends StatelessWidget {
   final int number;
+  final bool visited;
 
-  const NumberedMarker({super.key, required this.number});
+  const NumberedMarker({super.key, required this.number, this.visited = false});
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +12,7 @@ class NumberedMarker extends StatelessWidget {
       width: 26,
       height: 26,
       decoration: BoxDecoration(
-        color: Colors.redAccent,
+        color: visited ? Colors.green : Colors.redAccent,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
       ),

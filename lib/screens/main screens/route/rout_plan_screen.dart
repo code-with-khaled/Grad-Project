@@ -167,7 +167,10 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                   height: 40,
                   child: GestureDetector(
                     onTap: () => _showCustomerSheet(customers[i], i + 1),
-                    child: NumberedMarker(number: i + 1),
+                    child: NumberedMarker(
+                      number: i + 1,
+                      visited: customers[i].visited,
+                    ),
                   ),
                 ),
             ],
