@@ -31,6 +31,14 @@ class CustomerProvider extends ChangeNotifier {
         lat: 33.5190,
         lng: 36.2800,
       ),
+      Customer(
+        name: "Customer 3",
+        id: 3,
+        address: "Address 3",
+        phone: "Phone 3",
+        lat: 33.5200,
+        lng: 36.2880,
+      ),
     ];
 
     _isLoading = false;

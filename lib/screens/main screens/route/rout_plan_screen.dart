@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:grad_project/models/customer.dart';
 import 'package:grad_project/providers/customer_provider.dart';
 import 'package:grad_project/providers/route_plan_provider.dart';
+import 'package:grad_project/providers/user_location_provider.dart';
 import 'package:grad_project/providers/visit_provider.dart';
 import 'package:grad_project/screens/main%20screens/visits/visit_summury_screen.dart';
 import 'package:grad_project/services/location_service.dart';
+import 'package:grad_project/utils/map_launcher.dart';
 import 'package:grad_project/widgets/numbered_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +51,22 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
         if (customerProvider.customers.isNotEmpty) {
           routeProvider.fetchRoute(customerProvider.customers);
         }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Start live location updates
+    Future.microtask(() {
+      if (!mounted) return;
+
+      final userLoc = context.read<UserLocationProvider>();
+
+      Timer.periodic(const Duration(seconds: 3), (_) {
+        userLoc.update();
       });
     });
   }
@@ -109,6 +129,18 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
               SizedBox(
                 width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.directions),
+                  label: Text("Get Directions"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    MapLauncher.openDirections(c.lat, c.lng);
+                  },
+                ),
+              ),
+
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
                     Navigator.pop(context); // close bottom sheet
@@ -141,6 +173,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   Widget build(BuildContext context) {
     final customers = context.watch<CustomerProvider>().customers;
     final provider = context.watch<RoutePlanProvider>();
+    final userLoc = context.watch<UserLocationProvider>().current;
 
     return Scaffold(
       appBar: AppBar(title: Text("Today's Route")),
@@ -156,6 +189,25 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=2pmivbrl0Vvc2gCFhs8L",
             userAgentPackageName: 'com.example.app',
           ),
+
+          // User location marker
+          if (userLoc != null)
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: userLoc,
+                  width: 20,
+                  height: 20,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
           // Markers
           MarkerLayer(

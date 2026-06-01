@@ -3,6 +3,7 @@ import 'package:grad_project/providers/customer_provider.dart';
 import 'package:grad_project/providers/invoice_provider.dart';
 import 'package:grad_project/providers/login_provider.dart';
 import 'package:grad_project/providers/route_plan_provider.dart';
+import 'package:grad_project/providers/user_location_provider.dart';
 import 'package:grad_project/providers/visit_provider.dart';
 import 'package:grad_project/screens/login/login_screen.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
         ChangeNotifierProvider(create: (_) => VisitProvider()),
+        ChangeNotifierProvider(create: (_) => UserLocationProvider()),
       ],
       child: const MyApp(),
     ),
