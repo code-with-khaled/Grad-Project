@@ -24,34 +24,58 @@ class RoutePlanScreen extends StatefulWidget {
 class _RoutePlanScreenState extends State<RoutePlanScreen> {
   final MapController _mapController = MapController();
 
+  bool _followUser = true;
+  Timer? _locationTimer;
   bool _initialized = false;
+  VoidCallback? _routeListener;
+  VoidCallback? _customerListener;
+  late CustomerProvider _customerProvider;
+  late RoutePlanProvider _routeProvider;
+  bool _mapReady = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if (!_initialized) {
+      _customerProvider = context.read<CustomerProvider>();
+      _routeProvider = context.read<RoutePlanProvider>();
+    }
+
     if (_initialized) return;
     _initialized = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final customerProvider = context.read<CustomerProvider>();
-      final routeProvider = context.read<RoutePlanProvider>();
+      final customerProvider = _customerProvider;
+      final routeProvider = _routeProvider;
 
       if (customerProvider.customers.isEmpty) {
         customerProvider.loadCustomers();
       }
 
-      routeProvider.addListener(() {
+      _routeListener = () {
+        if (!mounted) return;
         if (routeProvider.routePoints.isNotEmpty) {
-          _fitToRoute(routeProvider.routePoints);
-        }
-      });
+          setState(() => _followUser = false);
 
-      customerProvider.addListener(() {
+          if (_mapReady) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _fitToRoute(routeProvider.routePoints);
+              }
+            });
+          }
+        }
+      };
+      routeProvider.addListener(_routeListener!);
+
+      _customerListener = () {
+        if (!mounted) return;
         if (customerProvider.customers.isNotEmpty) {
           routeProvider.fetchRoute(customerProvider.customers);
         }
-      });
+      };
+      customerProvider.addListener(_customerListener!);
     });
   }
 
@@ -59,16 +83,35 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   void initState() {
     super.initState();
 
-    // Start live location updates
     Future.microtask(() {
       if (!mounted) return;
 
       final userLoc = context.read<UserLocationProvider>();
 
-      Timer.periodic(const Duration(seconds: 3), (_) {
-        userLoc.update();
+      _locationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+        if (mounted) {
+          userLoc.update();
+        }
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _locationTimer?.cancel();
+
+    final customerProvider = _customerProvider;
+    final routeProvider = _routeProvider;
+
+    if (_routeListener != null) {
+      routeProvider.removeListener(_routeListener!);
+    }
+
+    if (_customerListener != null) {
+      customerProvider.removeListener(_customerListener!);
+    }
+
+    super.dispose();
   }
 
   void _fitToRoute(List<LatLng> points) {
@@ -175,6 +218,14 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     final provider = context.watch<RoutePlanProvider>();
     final userLoc = context.watch<UserLocationProvider>().current;
 
+    if (_followUser && userLoc != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _mapController.move(userLoc, _mapController.camera.zoom);
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text("Today's Route")),
       body: FlutterMap(
@@ -182,6 +233,12 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
         options: MapOptions(
           initialCenter: LatLng(33.5138, 36.2765),
           initialZoom: 13,
+          onMapReady: () => setState(() => _mapReady = true),
+          onPositionChanged: (position, hasGesture) {
+            if (hasGesture) {
+              setState(() => _followUser = false);
+            }
+          },
         ),
         children: [
           TileLayer(
@@ -243,6 +300,22 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
               ],
             ),
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.my_location),
+        onPressed: () {
+          setState(() => _followUser = true);
+
+          final userLoc = context.read<UserLocationProvider>().current;
+          if (_mapReady && _followUser && userLoc != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _mapController.move(userLoc, _mapController.camera.zoom);
+              }
+            });
+          }
+        },
       ),
     );
   }
