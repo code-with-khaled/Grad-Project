@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/models/invoice_item.dart';
 
-class _AddItemDialog extends StatefulWidget {
+class AddItemDialog extends StatefulWidget {
   final Function(InvoiceItem) onAdd;
 
-  const _AddItemDialog({required this.onAdd});
+  const AddItemDialog({super.key, required this.onAdd});
 
   @override
-  State<_AddItemDialog> createState() => _AddItemDialogState();
+  State<AddItemDialog> createState() => _AddItemDialogState();
 }
 
-class _AddItemDialogState extends State<_AddItemDialog> {
+class _AddItemDialogState extends State<AddItemDialog> {
   final nameCtrl = TextEditingController();
   final qtyCtrl = TextEditingController();
   final priceCtrl = TextEditingController();

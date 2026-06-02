@@ -53,6 +53,7 @@ class VisitProvider extends ChangeNotifier {
 
     return {
       "id": v.id,
+      "visitId": v.id,
       "customerId": v.customerId,
       "startTime": v.startTime.toIso8601String(),
       "startLat": v.startLat,

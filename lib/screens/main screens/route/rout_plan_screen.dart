@@ -198,8 +198,11 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
                     navigator.push(
                       MaterialPageRoute(
-                        builder: (_) =>
-                            VisitSummaryScreen(customer: c, order: order),
+                        builder: (_) => VisitSummaryScreen(
+                          customer: c,
+                          order: order,
+                          visit: visitProvider.currentVisit!,
+                        ),
                       ),
                     );
                   },
@@ -337,8 +340,11 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
                 navigator.push(
                   MaterialPageRoute(
-                    builder: (_) =>
-                        VisitSummaryScreen(customer: customer, order: order),
+                    builder: (_) => VisitSummaryScreen(
+                      customer: customer,
+                      order: order,
+                      visit: visitProvider.currentVisit!,
+                    ),
                   ),
                 );
               },
@@ -348,7 +354,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
       floatingActionButton: Padding(
         padding: _nextCustomer != null
-            ? const EdgeInsets.only(bottom: 120)
+            ? const EdgeInsets.only(bottom: 100)
             : EdgeInsets.zero,
         child: FloatingActionButton(
           child: Icon(Icons.my_location),

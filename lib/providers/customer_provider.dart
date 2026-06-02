@@ -17,7 +17,7 @@ class CustomerProvider extends ChangeNotifier {
     _customers = [
       Customer(
         name: "Customer 1",
-        id: 1,
+        id: "1",
         address: "Address 1",
         phone: "Phone 1",
         lat: 33.5138,
@@ -25,7 +25,7 @@ class CustomerProvider extends ChangeNotifier {
       ),
       Customer(
         name: "Customer 2",
-        id: 2,
+        id: "2",
         address: "Address 2",
         phone: "Phone 2",
         lat: 33.5190,
@@ -33,7 +33,7 @@ class CustomerProvider extends ChangeNotifier {
       ),
       Customer(
         name: "Customer 3",
-        id: 3,
+        id: "3",
         address: "Address 3",
         phone: "Phone 3",
         lat: 33.5200,
@@ -45,7 +45,7 @@ class CustomerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void markVisited(int customerId) {
+  void markVisited(String customerId) {
     final index = _customers.indexWhere((c) => c.id == customerId);
     if (index != -1) {
       _customers[index].visited = true;

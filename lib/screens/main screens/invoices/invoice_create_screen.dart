@@ -3,6 +3,7 @@ import 'package:grad_project/models/invoice.dart';
 import 'package:grad_project/models/invoice_item.dart';
 import 'package:grad_project/models/visit_model.dart';
 import 'package:grad_project/providers/invoice_provider.dart';
+import 'package:grad_project/widgets/add_item_dialog.dart';
 import 'package:provider/provider.dart';
 
 class InvoiceCreateScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
   void _addItem() {
     showDialog(
       context: context,
-      builder: (_) => _AddItemDialog(
+      builder: (_) => AddItemDialog(
         onAdd: (item) {
           setState(() => _items.add(item));
         },
@@ -32,7 +33,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
     final invoice = Invoice(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       visitId: widget.visit.id,
-      customerId: widget.visit.customerId.toString(),
+      customerId: widget.visit.customerId,
       date: DateTime.now(),
       items: _items,
     );
@@ -72,65 +73,6 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AddItemDialog extends StatefulWidget {
-  final Function(InvoiceItem) onAdd;
-
-  const _AddItemDialog({required this.onAdd});
-
-  @override
-  State<_AddItemDialog> createState() => _AddItemDialogState();
-}
-
-class _AddItemDialogState extends State<_AddItemDialog> {
-  final nameCtrl = TextEditingController();
-  final qtyCtrl = TextEditingController();
-  final priceCtrl = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("Add Item"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: nameCtrl,
-            decoration: InputDecoration(labelText: "Item name"),
-          ),
-          TextField(
-            controller: qtyCtrl,
-            decoration: InputDecoration(labelText: "Quantity"),
-            keyboardType: TextInputType.number,
-          ),
-          TextField(
-            controller: priceCtrl,
-            decoration: InputDecoration(labelText: "Unit price"),
-            keyboardType: TextInputType.number,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text("Cancel"),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            final item = InvoiceItem(
-              name: nameCtrl.text,
-              quantity: int.parse(qtyCtrl.text),
-              price: double.parse(priceCtrl.text),
-            );
-            widget.onAdd(item);
-            Navigator.pop(context);
-          },
-          child: Text("Add"),
-        ),
-      ],
     );
   }
 }
