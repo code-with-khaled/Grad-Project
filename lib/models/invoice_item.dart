@@ -1,12 +1,10 @@
 class InvoiceItem {
-  final int productId;
-  final String productName;
+  final String name;
   final int quantity;
   final double price;
 
   InvoiceItem({
-    required this.productId,
-    required this.productName,
+    required this.name,
     required this.quantity,
     required this.price,
   });

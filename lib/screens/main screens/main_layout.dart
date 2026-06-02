@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/screens/main%20screens/customers/customer_list_screen.dart';
 import 'package:grad_project/screens/main%20screens/home/home_screen.dart';
 import 'package:grad_project/screens/main%20screens/invoices/invoices_screen.dart';
 import 'package:grad_project/screens/main%20screens/route/rout_plan_screen.dart';
@@ -18,7 +17,6 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _screens = [
     HomeScreen(),
     RoutePlanScreen(),
-    CustomerListScreen(),
     VisitsScreen(),
     InvoicesScreen(),
   ];

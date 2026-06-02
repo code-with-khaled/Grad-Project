@@ -10,6 +10,7 @@ import 'package:grad_project/providers/visit_provider.dart';
 import 'package:grad_project/screens/main%20screens/visits/visit_summury_screen.dart';
 import 'package:grad_project/services/location_service.dart';
 import 'package:grad_project/utils/map_launcher.dart';
+import 'package:grad_project/widgets/next_customer_card.dart';
 import 'package:grad_project/widgets/numbered_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -212,13 +213,23 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     );
   }
 
+  Customer? get _nextCustomer {
+    if (_customerProvider.customers.isEmpty) return null;
+
+    for (final c in _customerProvider.customers) {
+      if (!c.visited) return c;
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final customers = context.watch<CustomerProvider>().customers;
     final provider = context.watch<RoutePlanProvider>();
     final userLoc = context.watch<UserLocationProvider>().current;
 
-    if (_followUser && userLoc != null) {
+    if (_mapReady && _followUser && userLoc != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _mapController.move(userLoc, _mapController.camera.zoom);
@@ -228,94 +239,132 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text("Today's Route")),
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: LatLng(33.5138, 36.2765),
-          initialZoom: 13,
-          onMapReady: () => setState(() => _mapReady = true),
-          onPositionChanged: (position, hasGesture) {
-            if (hasGesture) {
-              setState(() => _followUser = false);
-            }
-          },
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate:
-                "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=2pmivbrl0Vvc2gCFhs8L",
-            userAgentPackageName: 'com.example.app',
-          ),
-
-          // User location marker
-          if (userLoc != null)
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: userLoc,
-                  width: 20,
-                  height: 20,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                    ),
-                  ),
-                ),
-              ],
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: LatLng(33.5138, 36.2765),
+              initialZoom: 13,
+              onMapReady: () => setState(() => _mapReady = true),
+              onPositionChanged: (position, hasGesture) {
+                if (hasGesture && _followUser) {
+                  setState(() => _followUser = false);
+                }
+              },
             ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=2pmivbrl0Vvc2gCFhs8L",
+                userAgentPackageName: 'com.example.app',
+              ),
 
-          // Markers
-          MarkerLayer(
-            markers: [
-              for (int i = 0; i < customers.length; i++)
-                Marker(
-                  point: LatLng(customers[i].lat, customers[i].lng),
-                  width: 40,
-                  height: 40,
-                  child: GestureDetector(
-                    onTap: () => _showCustomerSheet(customers[i], i + 1),
-                    child: NumberedMarker(
-                      number: i + 1,
-                      visited: customers[i].visited,
+              // User location marker
+              if (userLoc != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: userLoc,
+                      width: 20,
+                      height: 20,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+
+              // Markers
+              MarkerLayer(
+                markers: [
+                  for (int i = 0; i < customers.length; i++)
+                    Marker(
+                      point: LatLng(customers[i].lat, customers[i].lng),
+                      width: 40,
+                      height: 40,
+                      child: GestureDetector(
+                        onTap: () => _showCustomerSheet(customers[i], i + 1),
+                        child: NumberedMarker(
+                          number: i + 1,
+                          visited: customers[i].visited,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+
+              // Route polyline
+              if (provider.isLoading)
+                const Center(child: CircularProgressIndicator()),
+
+              if (!provider.isLoading && provider.routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: provider.routePoints,
+                      strokeWidth: 4,
+                      color: Colors.blue,
+                    ),
+                  ],
                 ),
             ],
           ),
 
-          // Route polyline
-          if (provider.isLoading)
-            const Center(child: CircularProgressIndicator()),
+          if (_nextCustomer != null)
+            NextCustomerCard(
+              customer: _nextCustomer!,
+              order: _customerProvider.customers.indexOf(_nextCustomer!) + 1,
+              onNavigate: () => MapLauncher.openDirections(
+                _nextCustomer!.lat,
+                _nextCustomer!.lng,
+              ),
+              onStartVisit: () async {
+                final visitProvider = context.read<VisitProvider>();
+                final navigator = Navigator.of(context);
 
-          if (!provider.isLoading && provider.routePoints.isNotEmpty)
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: provider.routePoints,
-                  strokeWidth: 4,
-                  color: Colors.blue,
-                ),
-              ],
+                final customer = _nextCustomer!;
+                final order = _customerProvider.customers.indexOf(customer) + 1;
+
+                final gps = await LocationService.getCurrentLocation();
+                if (!mounted) return;
+
+                visitProvider.startVisit(customer, gps);
+
+                navigator.push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        VisitSummaryScreen(customer: customer, order: order),
+                  ),
+                );
+              },
             ),
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.my_location),
-        onPressed: () {
-          setState(() => _followUser = true);
+      floatingActionButton: Padding(
+        padding: _nextCustomer != null
+            ? const EdgeInsets.only(bottom: 120)
+            : EdgeInsets.zero,
+        child: FloatingActionButton(
+          child: Icon(Icons.my_location),
+          onPressed: () {
+            setState(() => _followUser = true);
 
-          final userLoc = context.read<UserLocationProvider>().current;
-          if (_mapReady && _followUser && userLoc != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                _mapController.move(userLoc, _mapController.camera.zoom);
-              }
-            });
-          }
-        },
+            final userLoc = context.read<UserLocationProvider>().current;
+            if (_mapReady && userLoc != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _mapController.move(userLoc, _mapController.camera.zoom);
+                }
+              });
+            }
+          },
+        ),
       ),
     );
   }
