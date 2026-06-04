@@ -2,8 +2,8 @@ class Visit {
   final String id;
   final String customerId;
   final DateTime startTime;
-  final double startLat;
-  final double startLng;
+  double? startLat;
+  double? startLng;
 
   DateTime? endTime;
   double? endLat;

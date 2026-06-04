@@ -23,6 +23,19 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Visit startVisitOffline(Customer customer) {
+    currentVisit = Visit(
+      id: _generateId(),
+      customerId: customer.id,
+      startTime: DateTime.now(),
+      startLat: null,
+      startLng: null,
+    );
+
+    notifyListeners();
+    return currentVisit!;
+  }
+
   void cancelVisit() {
     currentVisit = null;
     notifyListeners();
