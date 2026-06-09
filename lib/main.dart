@@ -6,6 +6,7 @@ import 'package:grad_project/providers/route_plan_provider.dart';
 import 'package:grad_project/providers/user_location_provider.dart';
 import 'package:grad_project/providers/visit_provider.dart';
 import 'package:grad_project/screens/login/login_screen.dart';
+import 'package:grad_project/screens/main%20screens/route/rout_plan_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/map': (context) => const RoutePlanScreen(),
         // Define other routes here
       },
     );

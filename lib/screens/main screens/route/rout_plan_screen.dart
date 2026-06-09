@@ -187,6 +187,13 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
+                    if (c.visited) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Customer already visited")),
+                      );
+                      return;
+                    }
+
                     Navigator.pop(context); // close bottom sheet
 
                     final visitProvider = context.read<VisitProvider>();

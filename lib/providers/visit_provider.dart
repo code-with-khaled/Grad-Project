@@ -8,10 +8,25 @@ import '../models/customer.dart';
 class VisitProvider extends ChangeNotifier {
   Visit? currentVisit;
 
+  // NEW: store all visits
+  final List<Visit> _visits = [];
+
+  List<Visit> get allVisits => _visits;
+  List<Visit> get completedVisits =>
+      _visits.where((v) => v.status == "completed").toList();
+  List<Visit> get inProgressVisits =>
+      _visits.where((v) => v.status == "in_progress").toList();
+  List<Visit> get pendingVisits =>
+      _visits.where((v) => v.status == "pending").toList();
+
   bool get hasActiveVisit => currentVisit != null;
 
   void startVisit(Customer customer, LatLng gps) {
-    // If a visit is already active, ignore or cancel it
+    if (isVisited(customer.id)) {
+      // Optionally, you can throw an error or just return
+      return;
+    }
+
     currentVisit = Visit(
       id: _generateId(),
       customerId: customer.id,
@@ -20,10 +35,16 @@ class VisitProvider extends ChangeNotifier {
       startLng: gps.longitude,
     );
 
+    _visits.add(currentVisit!); // NEW: store visit
     notifyListeners();
   }
 
-  Visit startVisitOffline(Customer customer) {
+  void startVisitOffline(Customer customer) {
+    if (isVisited(customer.id)) {
+      // Optionally, you can throw an error or just return
+      return;
+    }
+
     currentVisit = Visit(
       id: _generateId(),
       customerId: customer.id,
@@ -32,11 +53,14 @@ class VisitProvider extends ChangeNotifier {
       startLng: null,
     );
 
+    _visits.add(currentVisit!); // NEW: store visit
     notifyListeners();
-    return currentVisit!;
   }
 
   void cancelVisit() {
+    if (currentVisit != null) {
+      currentVisit!.status = "canceled";
+    }
     currentVisit = null;
     notifyListeners();
   }
@@ -54,12 +78,17 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool isVisited(String customerId) {
+    return _visits.any(
+      (visit) => visit.customerId == customerId && visit.status == "completed",
+    );
+  }
+
   String _generateId() {
     return DateTime.now().millisecondsSinceEpoch.toString() +
         Random().nextInt(9999).toString();
   }
 
-  // for debugging/demo purposes, returns current visit data as a map
   Map<String, dynamic> get visitData {
     final v = currentVisit;
     if (v == null) return {};
