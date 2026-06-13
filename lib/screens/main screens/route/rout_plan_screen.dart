@@ -9,7 +9,6 @@ import 'package:grad_project/providers/user_location_provider.dart';
 import 'package:grad_project/providers/visit_provider.dart';
 import 'package:grad_project/screens/main%20screens/visits/visit_summury_screen.dart';
 import 'package:grad_project/services/location_service.dart';
-import 'package:grad_project/utils/map_launcher.dart';
 import 'package:grad_project/widgets/next_customer_card.dart';
 import 'package:grad_project/widgets/numbered_marker.dart';
 import 'package:latlong2/latlong.dart';
@@ -70,13 +69,13 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
       };
       routeProvider.addListener(_routeListener!);
 
-      _customerListener = () {
-        if (!mounted) return;
-        if (customerProvider.customers.isNotEmpty) {
-          routeProvider.fetchRoute(customerProvider.customers);
-        }
-      };
-      customerProvider.addListener(_customerListener!);
+      // _customerListener = () {
+      //   if (!mounted) return;
+      //   if (customerProvider.customers.isNotEmpty) {
+      //     routeProvider.fetchRoute(customerProvider.customers);
+      //   }
+      // };
+      // customerProvider.addListener(_customerListener!);
     });
   }
 
@@ -87,12 +86,23 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     Future.microtask(() {
       if (!mounted) return;
 
-      final userLoc = context.read<UserLocationProvider>();
+      final userLocProvider = context.read<UserLocationProvider>();
 
-      _locationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-        if (mounted) {
-          userLoc.update();
-        }
+      _locationTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+        if (!mounted) return;
+
+        userLocProvider.update();
+
+        final nextCustomer = _nextCustomer;
+        final current = userLocProvider.current;
+
+        if (nextCustomer == null) return;
+        if (current == null) return;
+
+        await context.read<RoutePlanProvider>().getNavigationRoute(
+          current,
+          LatLng(nextCustomer.lat, nextCustomer.lng),
+        );
       });
     });
   }
@@ -176,9 +186,18 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 child: OutlinedButton.icon(
                   icon: Icon(Icons.directions),
                   label: Text("Get Directions"),
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(context);
-                    MapLauncher.openDirections(c.lat, c.lng);
+
+                    final userLoc = context
+                        .read<UserLocationProvider>()
+                        .current;
+                    if (userLoc == null) return;
+
+                    await context.read<RoutePlanProvider>().getNavigationRoute(
+                      userLoc,
+                      LatLng(c.lat, c.lng),
+                    );
                   },
                 ),
               ),
@@ -231,6 +250,30 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     }
 
     return null;
+  }
+
+  Widget _buildInfoBox(RoutePlanProvider provider) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6)],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Distance: ${(provider.navigationDistance! / 1000).toStringAsFixed(2)} km",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "ETA: ${(provider.navigationDuration! / 60).toStringAsFixed(0)} min",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -312,27 +355,54 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
               if (provider.isLoading)
                 const Center(child: CircularProgressIndicator()),
 
-              if (!provider.isLoading && provider.routePoints.isNotEmpty)
+              // if (!provider.isLoading && provider.routePoints.isNotEmpty)
+              //   PolylineLayer(
+              //     polylines: [
+              //       Polyline(
+              //         points: provider.routePoints,
+              //         strokeWidth: 4,
+              //         color: Colors.blue,
+              //       ),
+              //     ],
+              //   ),
+
+              // Navigation route polyline
+              if (provider.navigationRoute.isNotEmpty)
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: provider.routePoints,
+                      points: provider.navigationRoute,
                       strokeWidth: 4,
-                      color: Colors.blue,
+                      color: Colors.orange,
                     ),
                   ],
                 ),
             ],
           ),
 
+          if (provider.navigationRoute.isNotEmpty)
+            Positioned(
+              top: 20,
+              left: 20,
+              right: 20,
+              child: _buildInfoBox(provider),
+            ),
+
           if (_nextCustomer != null)
             NextCustomerCard(
               customer: _nextCustomer!,
               order: _customerProvider.customers.indexOf(_nextCustomer!) + 1,
-              onNavigate: () => MapLauncher.openDirections(
-                _nextCustomer!.lat,
-                _nextCustomer!.lng,
-              ),
+              onNavigate: () async {
+                final userLoc = context.read<UserLocationProvider>().current;
+                final customer = _nextCustomer;
+                if (userLoc == null || customer == null) return;
+
+                await context.read<RoutePlanProvider>().getNavigationRoute(
+                  userLoc,
+                  LatLng(customer.lat, customer.lng),
+                );
+              },
+
               onStartVisit: () async {
                 final visitProvider = context.read<VisitProvider>();
                 final navigator = Navigator.of(context);

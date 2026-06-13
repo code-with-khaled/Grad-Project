@@ -6,7 +6,13 @@ class UserLocationProvider extends ChangeNotifier {
   LatLng? current;
 
   Future<void> update() async {
-    current = await LocationService.getCurrentLocation();
-    notifyListeners();
+    try {
+      final pos = await LocationService.getCurrentLocation();
+      current = pos;
+      notifyListeners();
+    } catch (e) {
+      // ignore: avoid_print
+      print("Location update failed: $e");
+    }
   }
 }

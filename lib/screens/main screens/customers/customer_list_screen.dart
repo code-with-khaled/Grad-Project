@@ -22,7 +22,7 @@ class CustomerListScreen extends StatelessWidget {
               itemBuilder: (_, i) {
                 final c = customers[i];
 
-                return CutomerCard(c: c, order: i);
+                return CustomerCard(c: c, order: i);
               },
             ),
     );

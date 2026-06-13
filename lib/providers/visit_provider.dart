@@ -78,6 +78,10 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<Visit> getVisitsForCustomer(String customerId) {
+    return _visits.where((v) => v.customerId == customerId).toList();
+  }
+
   bool isVisited(String customerId) {
     return _visits.any(
       (visit) => visit.customerId == customerId && visit.status == "completed",
