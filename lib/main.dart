@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/providers/customer_provider.dart';
-import 'package:grad_project/providers/invoice_provider.dart';
-import 'package:grad_project/providers/login_provider.dart';
-import 'package:grad_project/providers/route_plan_provider.dart';
-import 'package:grad_project/providers/user_location_provider.dart';
-import 'package:grad_project/providers/visit_provider.dart';
-import 'package:grad_project/screens/login/login_screen.dart';
-import 'package:grad_project/screens/main%20screens/route/rout_plan_screen.dart';
+import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
+import 'package:grad_project/features/auth/providers/login_provider.dart';
+import 'package:grad_project/features/route/providers/route_plan_provider.dart';
+import 'package:grad_project/features/route/providers/user_location_provider.dart';
+import 'package:grad_project/features/visits/providers/visit_provider.dart';
+import 'package:grad_project/features/auth/screens/login_screen.dart';
+import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
