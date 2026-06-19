@@ -63,7 +63,23 @@ class NextCustomerCard extends StatelessWidget {
                 ),
               ],
             ),
+
+            if (customer.visited)
+              Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green, size: 18),
+                  SizedBox(width: 6),
+                  Text(
+                    "Already visited",
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             SizedBox(height: 8),
+
             Text(
               "$order. ${customer.name}",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -86,13 +102,15 @@ class NextCustomerCard extends StatelessWidget {
                     onPressed: onNavigate,
                   ),
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onStartVisit,
-                    child: Text("Start Visit"),
+                if (!customer.visited) ...[
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onStartVisit,
+                      child: Text("Start Visit"),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ],

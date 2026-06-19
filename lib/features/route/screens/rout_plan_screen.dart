@@ -6,11 +6,13 @@ import 'package:grad_project/features/customers/models/customer.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
+import 'package:grad_project/features/route/widgets/navigation_info_box.dart';
+import 'package:grad_project/features/route/widgets/route_completed_banner.dart';
+import 'package:grad_project/features/route/widgets/route_map.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/visits/screens/visit_summury_screen.dart';
 import 'package:grad_project/core/services/location_service.dart';
 import 'package:grad_project/features/route/widgets/next_customer_card.dart';
-import 'package:grad_project/features/route/widgets/numbered_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -273,122 +275,15 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     return null;
   }
 
-  Widget _buildInfoBox(RoutePlanProvider provider) {
-    // Check if navigation data exists
-    if (provider.navigationDistance == null ||
-        provider.navigationDuration == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6)],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "Distance: ${(provider.navigationDistance! / 1000).toStringAsFixed(2)} km",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "ETA: ${(provider.navigationDuration! / 60).toStringAsFixed(0)} min",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          // Cancel button
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isNavigating = false;
-                _selectedCustomer = null;
-              });
-              provider.clearNavigation();
-            },
-            child: const Icon(Icons.close, color: Colors.red, size: 22),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMapContent() {
-    final customers = customerProvider.customers;
-    final userLoc = userLocationProvider.current;
-    final navRoute = routeProvider.navigationRoute;
-
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: const LatLng(33.5138, 36.2765),
-        initialZoom: 13,
-        onMapReady: () {
-          setState(() => _mapReady = true);
-
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _tryFitMap();
-          });
-        },
-      ),
-      children: [
-        TileLayer(
-          urlTemplate:
-              "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=2pmivbrl0Vvc2gCFhs8L",
-          userAgentPackageName: 'com.example.app',
-        ),
-
-        // User location marker
-        if (userLoc != null)
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: userLoc,
-                width: 30,
-                height: 30,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-        // Customer markers
-        if (customers.isNotEmpty)
-          MarkerLayer(
-            markers: [
-              for (int i = 0; i < customers.length; i++)
-                Marker(
-                  point: LatLng(customers[i].lat, customers[i].lng),
-                  width: 40,
-                  height: 40,
-                  child: NumberedMarker(
-                    number: i + 1,
-                    visited: customers[i].visited,
-                  ),
-                ),
-            ],
-          ),
-
-        // Navigation route polyline
-        if (navRoute.isNotEmpty)
-          PolylineLayer(
-            polylines: [
-              Polyline(points: navRoute, strokeWidth: 4, color: Colors.orange),
-            ],
-          ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final customers = customerProvider.customers;
+
+    final visitedCount = customers.where((c) => c.visited).length;
+
+    final totalCount = customers.length;
+
+    final routeCompleted = totalCount > 0 && visitedCount == totalCount;
 
     // Show loading indicator while data is loading
     if (_isLoading) {
@@ -408,10 +303,45 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     }
 
     final widget = Scaffold(
-      appBar: AppBar(title: const Text("Today's Route")),
+      appBar: AppBar(
+        title: const Text("Today's Route"),
+        actions: [
+          if (totalCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Text(
+                  "$visitedCount/$totalCount",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       body: Stack(
         children: [
-          _buildMapContent(),
+          RouteMap(
+            mapController: _mapController,
+            customers: customers,
+            userLocation: userLocationProvider.current,
+            navigationRoute: routeProvider.navigationRoute,
+            onMapReady: () {
+              setState(() => _mapReady = true);
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _tryFitMap();
+              });
+            },
+
+            onCustomerSelected: (customer) {
+              setState(() {
+                _manualNextCustomer = customer;
+              });
+            },
+          ),
 
           // Navigation info box
           if (routeProvider.navigationRoute.isNotEmpty)
@@ -419,11 +349,30 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
               top: 20,
               left: 20,
               right: 20,
-              child: _buildInfoBox(routeProvider),
+              child: NavigationInfoBox(
+                distance: routeProvider.navigationDistance,
+                duration: routeProvider.navigationDuration,
+                onCancel: () {
+                  setState(() {
+                    _isNavigating = false;
+                    _selectedCustomer = null;
+                  });
+
+                  routeProvider.clearNavigation();
+                },
+              ),
+            ),
+
+          if (routeCompleted)
+            const Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: RouteCompletedBanner(),
             ),
 
           // Next customer card
-          if (_nextCustomer != null && customers.isNotEmpty)
+          if (_nextCustomer != null)
             NextCustomerCard(
               customer: _nextCustomer!,
               order: customerProvider.customers.indexOf(_nextCustomer!) + 1,
@@ -487,22 +436,23 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 });
               },
             ),
-        ],
-      ),
-      floatingActionButton: Padding(
-        padding: _nextCustomer != null && customers.isNotEmpty
-            ? const EdgeInsets.only(bottom: 180)
-            : EdgeInsets.zero,
-        child: FloatingActionButton(
-          child: const Icon(Icons.my_location),
-          onPressed: () {
-            setState(() {
-              _fitOnce = false;
-            });
 
-            _tryFitMap();
-          },
-        ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: FloatingActionButton.small(
+              heroTag: "recenter",
+              onPressed: () {
+                setState(() {
+                  _fitOnce = false;
+                });
+
+                _tryFitMap();
+              },
+              child: const Icon(Icons.my_location),
+            ),
+          ),
+        ],
       ),
     );
 
