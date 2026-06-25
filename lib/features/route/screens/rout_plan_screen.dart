@@ -275,6 +275,12 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     return null;
   }
 
+  void showSnack(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final customers = customerProvider.customers;
@@ -406,6 +412,13 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 final customer = _nextCustomer!;
                 final order = customerProvider.customers.indexOf(customer) + 1;
 
+                final ok = await visitProvider.canStartVisit(customer);
+
+                if (!ok) {
+                  showSnack("You must be near the customer to start a visit.");
+                  return;
+                }
+
                 try {
                   final gps = await LocationService.getCurrentLocation();
                   if (!mounted) return;
@@ -438,7 +451,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
             ),
 
           Positioned(
-            top: 16,
+            top: _isNavigating ? 70 : 16,
             right: 16,
             child: FloatingActionButton.small(
               heroTag: "recenter",

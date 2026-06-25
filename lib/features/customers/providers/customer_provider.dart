@@ -21,8 +21,10 @@ class CustomerProvider extends ChangeNotifier {
         id: "1",
         address: "Address 1",
         phone: "Phone 1",
-        lat: 33.522222,
-        lng: 36.255556,
+        // lat: 33.522222,
+        // lng: 36.255556,
+        lat: 33.54588821856537,
+        lng: 36.21311734279374,
       ),
       Customer(
         name: "Customer 2",

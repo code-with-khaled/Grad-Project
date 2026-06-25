@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grad_project/core/services/location_service.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/auth/providers/login_provider.dart';
@@ -18,7 +19,9 @@ void main() {
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
-        ChangeNotifierProvider(create: (_) => VisitProvider()),
+        ChangeNotifierProvider(
+          create: (_) => VisitProvider(locationService: LocationService()),
+        ),
         ChangeNotifierProvider(create: (_) => UserLocationProvider()),
       ],
       child: const MyApp(),

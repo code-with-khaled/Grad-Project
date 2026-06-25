@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:grad_project/core/services/location_service.dart';
 import 'package:grad_project/features/visits/models/visit_model.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:latlong2/latlong.dart';
@@ -7,6 +8,9 @@ import '../../customers/models/customer.dart';
 
 class VisitProvider extends ChangeNotifier {
   Visit? currentVisit;
+  final LocationService locationService;
+
+  VisitProvider({required this.locationService});
 
   // NEW: store all visits
   final List<Visit> _visits = [];
@@ -20,6 +24,14 @@ class VisitProvider extends ChangeNotifier {
       _visits.where((v) => v.status == "pending").toList();
 
   bool get hasActiveVisit => currentVisit != null;
+
+  Future<bool> canStartVisit(Customer c) async {
+    return await locationService.isWithinGeofence(
+      targetLat: c.lat,
+      targetLng: c.lng,
+      radiusMeters: 80,
+    );
+  }
 
   void startVisit(Customer customer, LatLng gps) {
     if (isVisited(customer.id)) {

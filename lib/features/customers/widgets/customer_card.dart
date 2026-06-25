@@ -18,6 +18,12 @@ class CustomerCard extends StatefulWidget {
 class _CustomerCardState extends State<CustomerCard> {
   bool expanded = false;
 
+  void showSnack(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = widget.c;
@@ -82,32 +88,40 @@ class _CustomerCardState extends State<CustomerCard> {
                       SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             final visitProvider = context.read<VisitProvider>();
-
-                            visitProvider.startVisitOffline(c);
+                            final navigator = Navigator.of(context);
 
                             if (c.visited) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "This customer has already been visited today.",
-                                  ),
-                                ),
+                              showSnack(
+                                "This customer has already been visited today.",
                               );
                               return;
                             }
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => VisitSummaryScreen(
-                                  customer: c,
-                                  visit: visitProvider.currentVisit!,
-                                  order: widget.order + 1,
+                            final ok = await visitProvider.canStartVisit(c);
+
+                            if (!mounted) return;
+
+                            if (!ok) {
+                              showSnack(
+                                "You must be near the customer to start a visit.",
+                              );
+                              return;
+                            }
+                            visitProvider.startVisitOffline(c);
+
+                            if (mounted) {
+                              navigator.push(
+                                MaterialPageRoute(
+                                  builder: (_) => VisitSummaryScreen(
+                                    customer: c,
+                                    visit: visitProvider.currentVisit!,
+                                    order: widget.order + 1,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: Text("Start Visit"),
                         ),
