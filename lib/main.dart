@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/core/services/location_service.dart';
+import 'package:grad_project/features/auth/services/auth_service.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
-import 'package:grad_project/features/auth/providers/login_provider.dart';
+import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
@@ -15,7 +16,9 @@ void main() {
     MultiProvider(
       providers: [
         // Add providers here, e.g.:
-        ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(authService: AuthService()),
+        ),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
