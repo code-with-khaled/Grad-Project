@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:grad_project/features/customers/models/customer.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
@@ -32,8 +32,8 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   RoutePlanProvider? _routeProvider;
   UserLocationProvider? _userLocationProvider;
   bool _isNavigating = false;
-  Customer? _selectedCustomer;
-  Customer? _manualNextCustomer;
+  CustomerHive? _selectedCustomer;
+  CustomerHive? _manualNextCustomer;
   bool _mapReady = false;
   bool _fitOnce = false;
   bool _isLoading = true;
@@ -266,7 +266,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     super.dispose();
   }
 
-  Customer? get _nextCustomer {
+  CustomerHive? get _nextCustomer {
     if (_manualNextCustomer != null) return _manualNextCustomer;
 
     for (final c in customerProvider.customers) {
@@ -443,7 +443,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                   print('Error starting visit: $e');
                 }
               },
-              onSelectNextCustomer: (Customer c) {
+              onSelectNextCustomer: (CustomerHive c) {
                 setState(() {
                   _manualNextCustomer = c;
                 });

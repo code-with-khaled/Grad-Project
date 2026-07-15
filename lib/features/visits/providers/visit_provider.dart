@@ -1,10 +1,10 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:grad_project/core/services/location_service.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/visits/models/visit_model.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:latlong2/latlong.dart';
-import '../../customers/models/customer.dart';
 
 class VisitProvider extends ChangeNotifier {
   Visit? currentVisit;
@@ -25,7 +25,7 @@ class VisitProvider extends ChangeNotifier {
 
   bool get hasActiveVisit => currentVisit != null;
 
-  Future<bool> canStartVisit(Customer c) async {
+  Future<bool> canStartVisit(CustomerHive c) async {
     return await locationService.isWithinGeofence(
       targetLat: c.lat,
       targetLng: c.lng,
@@ -33,7 +33,7 @@ class VisitProvider extends ChangeNotifier {
     );
   }
 
-  void startVisit(Customer customer, LatLng gps) {
+  void startVisit(CustomerHive customer, LatLng gps) {
     if (isVisited(customer.id)) {
       // Optionally, you can throw an error or just return
       return;
@@ -51,7 +51,7 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void startVisitOffline(Customer customer) {
+  void startVisitOffline(CustomerHive customer) {
     if (isVisited(customer.id)) {
       // Optionally, you can throw an error or just return
       return;
@@ -90,11 +90,11 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Visit> getVisitsForCustomer(String customerId) {
+  List<Visit> getVisitsForCustomer(int customerId) {
     return _visits.where((v) => v.customerId == customerId).toList();
   }
 
-  bool isVisited(String customerId) {
+  bool isVisited(int customerId) {
     return _visits.any(
       (visit) => visit.customerId == customerId && visit.status == "completed",
     );

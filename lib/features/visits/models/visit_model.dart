@@ -1,6 +1,6 @@
 class Visit {
   final String id;
-  final String customerId;
+  final int customerId;
   final DateTime startTime;
   double? startLat;
   double? startLng;

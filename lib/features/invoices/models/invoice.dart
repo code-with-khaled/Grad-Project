@@ -3,7 +3,7 @@ import 'invoice_item.dart';
 class Invoice {
   final String id;
   final String visitId;
-  final String customerId;
+  final int customerId;
   final DateTime date;
   final List<InvoiceItem> items;
 

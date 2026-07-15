@@ -5,7 +5,7 @@ import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/visits/models/visit_model.dart';
 
 class CustomerVisitsScreen extends StatelessWidget {
-  final String customerId;
+  final int customerId;
   final String customerName;
 
   const CustomerVisitsScreen({

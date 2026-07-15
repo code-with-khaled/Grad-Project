@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/core/services/location_service.dart';
+import 'package:grad_project/core/storage/hive_boxes.dart';
 import 'package:grad_project/features/auth/services/auth_service.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
@@ -9,9 +11,23 @@ import 'package:grad_project/features/route/providers/user_location_provider.dar
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/auth/screens/login_screen.dart';
 import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(CustomerHiveAdapter());
+
+  await Hive.openBox(HiveBoxes.authBox);
+  await Hive.openBox<CustomerHive>(HiveBoxes.customers);
+  await Hive.openBox(HiveBoxes.vanStock);
+  await Hive.openBox(HiveBoxes.invoices);
+  await Hive.openBox(HiveBoxes.visits);
+  await Hive.openBox(HiveBoxes.epod);
+
   runApp(
     MultiProvider(
       providers: [
@@ -39,7 +55,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sales Rep App',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),

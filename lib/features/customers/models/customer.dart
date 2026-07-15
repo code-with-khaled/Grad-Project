@@ -1,19 +1,19 @@
-class Customer {
-  final String id;
-  final String name;
-  final String address;
-  final String phone;
-  final double lat;
-  final double lng;
-  bool visited;
+// class Customer {
+//   final String id;
+//   final String name;
+//   final String address;
+//   final String phone;
+//   final double lat;
+//   final double lng;
+//   bool visited;
 
-  Customer({
-    required this.id,
-    required this.name,
-    required this.address,
-    required this.phone,
-    required this.lat,
-    required this.lng,
-    this.visited = false,
-  });
-}
+//   Customer({
+//     required this.id,
+//     required this.name,
+//     required this.address,
+//     required this.phone,
+//     required this.lat,
+//     required this.lng,
+//     this.visited = false,
+//   });
+// }

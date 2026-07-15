@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/customers/models/customer.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/visits/models/visit_model.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
@@ -10,7 +10,7 @@ import 'package:grad_project/core/services/location_service.dart';
 import 'package:provider/provider.dart';
 
 class VisitSummaryScreen extends StatefulWidget {
-  final Customer customer;
+  final CustomerHive customer;
   final int order;
   final Visit visit;
 

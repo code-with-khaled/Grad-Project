@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/customers/models/customer.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/visits/screens/visit_summury_screen.dart';
 import 'package:grad_project/features/customers/screens/customer_visits_screen.dart';
 import 'package:provider/provider.dart';
 
 class CustomerCard extends StatefulWidget {
-  final Customer c;
+  final CustomerHive c;
   final int order;
 
   const CustomerCard({super.key, required this.c, required this.order});

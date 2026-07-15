@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/customers/models/customer.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:provider/provider.dart';
 
 class NextCustomerCard extends StatelessWidget {
-  final Customer customer;
+  final CustomerHive customer;
   final int order;
   final VoidCallback onNavigate;
   final VoidCallback onStartVisit;
-  final void Function(Customer) onSelectNextCustomer;
+  final void Function(CustomerHive) onSelectNextCustomer;
 
   const NextCustomerCard({
     super.key,
@@ -52,7 +52,7 @@ class NextCustomerCard extends StatelessWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
 
-                PopupMenuButton<Customer>(
+                PopupMenuButton<CustomerHive>(
                   icon: Icon(Icons.swap_horiz),
                   onSelected: (c) => onSelectNextCustomer(c),
                   itemBuilder: (context) {

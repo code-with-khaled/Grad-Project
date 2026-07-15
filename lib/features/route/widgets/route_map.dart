@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:grad_project/features/customers/models/customer.dart';
+import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/route/widgets/numbered_marker.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -16,11 +16,11 @@ class RouteMap extends StatelessWidget {
   });
 
   final MapController mapController;
-  final List<Customer> customers;
+  final List<CustomerHive> customers;
   final LatLng? userLocation;
   final List<LatLng> navigationRoute;
   final VoidCallback onMapReady;
-  final ValueChanged<Customer> onCustomerSelected;
+  final ValueChanged<CustomerHive> onCustomerSelected;
 
   @override
   Widget build(BuildContext context) {
