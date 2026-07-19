@@ -8,6 +8,8 @@ import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
+import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
+import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/auth/screens/login_screen.dart';
 import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
@@ -20,10 +22,11 @@ void main() async {
   await Hive.initFlutter();
 
   Hive.registerAdapter(CustomerHiveAdapter());
+  Hive.registerAdapter(VanStockHiveAdapter());
 
   await Hive.openBox(HiveBoxes.authBox);
   await Hive.openBox<CustomerHive>(HiveBoxes.customers);
-  await Hive.openBox(HiveBoxes.vanStock);
+  await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
   await Hive.openBox(HiveBoxes.invoices);
   await Hive.openBox(HiveBoxes.visits);
   await Hive.openBox(HiveBoxes.epod);
@@ -35,6 +38,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService: AuthService()),
         ),
+        ChangeNotifierProvider(create: (_) => VanStockProvider()),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
