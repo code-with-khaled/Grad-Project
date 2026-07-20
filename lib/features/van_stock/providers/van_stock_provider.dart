@@ -34,6 +34,7 @@ class VanStockProvider extends ChangeNotifier {
     ];
 
     // 2. Save mock data to Hive
+    await _box.clear();
     await _local.saveAll(mock);
 
     _isLoading = false;

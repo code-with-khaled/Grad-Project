@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/invoices/models/invoice.dart';
+import 'package:grad_project/features/invoices/models/invoice_hive.dart';
 
 class InvoiceDetailsScreen extends StatelessWidget {
-  final Invoice invoice;
+  final InvoiceHive invoice;
 
   const InvoiceDetailsScreen({super.key, required this.invoice});
 
@@ -20,7 +20,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
             ),
             SizedBox(height: 6),
             Text("Customer: ${invoice.customerId}"),
-            Text("Date: ${invoice.date.toLocal()}"),
+            Text("Date: ${invoice.createdAt.toLocal()}"),
 
             SizedBox(height: 20),
             Divider(),

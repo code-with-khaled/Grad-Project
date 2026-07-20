@@ -56,7 +56,7 @@ class VisitCompletedScreen extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
 
-                      Text("Date: ${invoice.date}"),
+                      Text("Date: ${invoice.createdAt.toLocal()}"),
 
                       const SizedBox(height: 10),
                       Text(

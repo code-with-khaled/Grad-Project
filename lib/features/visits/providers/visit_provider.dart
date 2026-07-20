@@ -100,9 +100,8 @@ class VisitProvider extends ChangeNotifier {
     );
   }
 
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString() +
-        Random().nextInt(9999).toString();
+  int _generateId() {
+    return DateTime.now().millisecondsSinceEpoch + Random().nextInt(9999);
   }
 
   Map<String, dynamic> get visitData {

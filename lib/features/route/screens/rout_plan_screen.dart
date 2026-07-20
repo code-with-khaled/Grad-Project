@@ -81,15 +81,6 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   void _loadInitialData() {
     if (!mounted) return;
 
-    // Load customers if needed
-    if (customerProvider.customers.isEmpty) {
-      customerProvider.loadCustomers().then((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
-
     // Try to get user location
     userLocationProvider.update().then((_) {
       if (mounted) {

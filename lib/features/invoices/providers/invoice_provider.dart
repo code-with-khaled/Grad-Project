@@ -1,17 +1,47 @@
 import 'package:flutter/material.dart';
-import '../models/invoice.dart';
+import 'package:hive/hive.dart';
+
+import '../models/invoice_hive.dart';
+import '../models/invoice_item_hive.dart';
+import '../../van_stock/services/van_stock_local_service.dart';
 
 class InvoiceProvider extends ChangeNotifier {
-  final List<Invoice> _invoices = [];
+  final Box<InvoiceHive> _box = Hive.box<InvoiceHive>('invoicesBox');
 
-  List<Invoice> get invoices => _invoices;
+  List<InvoiceHive> get invoices => _box.values.toList();
 
-  void addInvoice(Invoice invoice) {
-    _invoices.add(invoice);
-    notifyListeners();
+  List<InvoiceHive> getInvoicesForVisit(int visitId) {
+    return _box.values.where((i) => i.visitId == visitId).toList();
   }
 
-  List<Invoice> getInvoicesForVisit(String visitId) {
-    return _invoices.where((i) => i.visitId == visitId).toList();
+  Future<void> addInvoice({
+    required int customerId,
+    required int visitId,
+    required List<InvoiceItemHive> items,
+  }) async {
+    final total = items.fold(
+      0.0,
+      (sum, item) => sum + item.price * item.quantity,
+    );
+
+    final invoice = InvoiceHive(
+      id: DateTime.now().millisecondsSinceEpoch,
+      customerId: customerId,
+      visitId: visitId,
+      total: total,
+      createdAt: DateTime.now(),
+      items: items,
+      synced: false,
+    );
+
+    await _box.add(invoice);
+
+    // Deduct van stock
+    final vanStock = VanStockLocalService();
+    for (final item in items) {
+      await vanStock.deductQuantity(item.itemId, item.quantity);
+    }
+
+    notifyListeners();
   }
 }

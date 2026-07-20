@@ -30,7 +30,7 @@ class InvoicesScreen extends StatelessWidget {
                     ),
                     subtitle: Text(
                       "Customer: ${invoice.customerId}\n"
-                      "Date: ${invoice.date.toLocal()}",
+                      "Date: ${invoice.createdAt.toLocal()}",
                     ),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

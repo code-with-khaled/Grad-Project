@@ -4,6 +4,8 @@ import 'package:grad_project/core/storage/hive_boxes.dart';
 import 'package:grad_project/features/auth/services/auth_service.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/invoices/models/invoice_hive.dart';
+import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
@@ -23,11 +25,13 @@ void main() async {
 
   Hive.registerAdapter(CustomerHiveAdapter());
   Hive.registerAdapter(VanStockHiveAdapter());
+  Hive.registerAdapter(InvoiceHiveAdapter());
+  Hive.registerAdapter(InvoiceItemHiveAdapter());
 
   await Hive.openBox(HiveBoxes.authBox);
   await Hive.openBox<CustomerHive>(HiveBoxes.customers);
   await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
-  await Hive.openBox(HiveBoxes.invoices);
+  await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
   await Hive.openBox(HiveBoxes.visits);
   await Hive.openBox(HiveBoxes.epod);
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/invoices/models/invoice.dart';
-import 'package:grad_project/features/invoices/models/invoice_item.dart';
-import 'package:grad_project/features/visits/models/visit_model.dart';
-import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
-import 'package:grad_project/features/invoices/widgets/add_item_dialog.dart';
 import 'package:provider/provider.dart';
+
+import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
+import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
+import 'package:grad_project/features/visits/models/visit_model.dart';
+import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 
 class InvoiceCreateScreen extends StatefulWidget {
   final Visit visit;
@@ -16,31 +16,78 @@ class InvoiceCreateScreen extends StatefulWidget {
 }
 
 class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
-  final List<InvoiceItem> _items = [];
+  final List<InvoiceItemHive> _items = [];
 
   void _addItem() {
-    showDialog(
+    final vanItems = context.read<VanStockProvider>().items;
+
+    showModalBottomSheet(
       context: context,
-      builder: (_) => AddItemDialog(
-        onAdd: (item) {
-          setState(() => _items.add(item));
-        },
-      ),
+      builder: (_) {
+        return ListView(
+          children: vanItems.map((stockItem) {
+            return ListTile(
+              title: Text(stockItem.name),
+              subtitle: Text(
+                "Price: ${stockItem.price} • Available: ${stockItem.quantity}",
+              ),
+              onTap: () async {
+                final qtyController = TextEditingController();
+
+                // Ask for quantity
+                final qty = await showDialog<int>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text("Quantity for ${stockItem.name}"),
+                    content: TextField(
+                      controller: qtyController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(hintText: "Enter quantity"),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          final q = int.tryParse(qtyController.text);
+                          Navigator.pop(context, q);
+                        },
+                        child: Text("Add"),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (qty != null && qty > 0 && qty <= stockItem.quantity) {
+                  setState(() {
+                    _items.add(
+                      InvoiceItemHive(
+                        itemId: stockItem.id,
+                        name: stockItem.name,
+                        price: stockItem.price,
+                        quantity: qty,
+                      ),
+                    );
+                  });
+                }
+
+                if (!mounted) return;
+
+                Navigator.pop(context); // close bottom sheet
+              },
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
   void _saveInvoice() {
-    final invoice = Invoice(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      visitId: widget.visit.id,
+    context.read<InvoiceProvider>().addInvoice(
       customerId: widget.visit.customerId,
-      date: DateTime.now(),
+      visitId: widget.visit.id,
       items: _items,
     );
 
-    context.read<InvoiceProvider>().addInvoice(invoice);
-
-    Navigator.pop(context); // close invoice screen
+    Navigator.pop(context);
   }
 
   @override
@@ -59,7 +106,9 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                 return ListTile(
                   title: Text(item.name),
                   subtitle: Text("${item.quantity} × ${item.price}"),
-                  trailing: Text(item.total.toStringAsFixed(2)),
+                  trailing: Text(
+                    (item.price * item.quantity).toStringAsFixed(2),
+                  ),
                 );
               }).toList(),
             ),
