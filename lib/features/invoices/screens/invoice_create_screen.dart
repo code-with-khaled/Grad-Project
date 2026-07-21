@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:provider/provider.dart';
 
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
-import 'package:grad_project/features/visits/models/visit_model.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 
 class InvoiceCreateScreen extends StatefulWidget {
-  final Visit visit;
+  final VisitHive visit;
 
   const InvoiceCreateScreen({super.key, required this.visit});
 

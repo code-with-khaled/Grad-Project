@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
-import 'package:grad_project/features/visits/models/visit_model.dart';
+import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/invoices/screens/invoice_create_screen.dart';
@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 class VisitSummaryScreen extends StatefulWidget {
   final CustomerHive customer;
   final int order;
-  final Visit visit;
+  final VisitHive visit;
 
   const VisitSummaryScreen({
     super.key,
@@ -123,9 +123,24 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
 
                   final gps = await LocationService.getCurrentLocation();
 
+                  // Capture visit BEFORE finishing it
+                  final visit = visitProvider.currentVisit;
+
+                  visitProvider.addDummyEPOD();
                   visitProvider.finishVisit(gps, customerProvider);
 
-                  final data = visitProvider.visitData;
+                  // Build safe data map
+                  final data = {
+                    "id": visit!.id,
+                    "customerId": visit.customerId,
+                    "startTime": visit.startTime.toIso8601String(),
+                    "startLat": visit.startLat,
+                    "startLng": visit.startLng,
+                    "endTime": DateTime.now().toIso8601String(),
+                    "endLat": gps.latitude,
+                    "endLng": gps.longitude,
+                    "status": "completed",
+                  };
 
                   navigator.pushReplacement(
                     MaterialPageRoute(

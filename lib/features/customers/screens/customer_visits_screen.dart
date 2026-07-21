@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/widgets/visit_card.dart';
 import 'package:provider/provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
-import 'package:grad_project/features/visits/models/visit_model.dart';
 
 class CustomerVisitsScreen extends StatelessWidget {
   final int customerId;
@@ -32,7 +32,7 @@ class CustomerVisitsScreen extends StatelessWidget {
           : ListView.builder(
               itemCount: visits.length,
               itemBuilder: (_, i) {
-                final Visit v = visits[i];
+                final VisitHive v = visits[i];
 
                 return VisitCard(visit: v);
               },

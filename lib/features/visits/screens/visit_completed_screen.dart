@@ -10,7 +10,7 @@ class VisitCompletedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visitId = data["visitId"];
+    final visitId = data["id"];
     final invoices = context.watch<InvoiceProvider>().getInvoicesForVisit(
       visitId,
     );

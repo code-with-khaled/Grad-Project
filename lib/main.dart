@@ -12,6 +12,7 @@ import 'package:grad_project/features/route/providers/route_plan_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
 import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
+import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/auth/screens/login_screen.dart';
 import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
@@ -27,12 +28,13 @@ void main() async {
   Hive.registerAdapter(VanStockHiveAdapter());
   Hive.registerAdapter(InvoiceHiveAdapter());
   Hive.registerAdapter(InvoiceItemHiveAdapter());
+  Hive.registerAdapter(VisitHiveAdapter());
 
   await Hive.openBox(HiveBoxes.authBox);
   await Hive.openBox<CustomerHive>(HiveBoxes.customers);
   await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
   await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
-  await Hive.openBox(HiveBoxes.visits);
+  await Hive.openBox<VisitHive>(HiveBoxes.visits);
   await Hive.openBox(HiveBoxes.epod);
 
   runApp(

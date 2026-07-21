@@ -1,30 +1,30 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:grad_project/core/services/location_service.dart';
-import 'package:grad_project/features/customers/models/customer_hive.dart';
-import 'package:grad_project/features/visits/models/visit_model.dart';
-import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../models/visit_hive.dart';
+import '../../customers/models/customer_hive.dart';
+import '../../customers/providers/customer_provider.dart';
+import '../../../core/services/location_service.dart';
+
 class VisitProvider extends ChangeNotifier {
-  Visit? currentVisit;
   final LocationService locationService;
+  final Box<VisitHive> _box = Hive.box<VisitHive>('visitsBox');
+
+  VisitHive? currentVisit;
 
   VisitProvider({required this.locationService});
 
-  // NEW: store all visits
-  final List<Visit> _visits = [];
-
-  List<Visit> get allVisits => _visits;
-  List<Visit> get completedVisits =>
-      _visits.where((v) => v.status == "completed").toList();
-  List<Visit> get inProgressVisits =>
-      _visits.where((v) => v.status == "in_progress").toList();
-  List<Visit> get pendingVisits =>
-      _visits.where((v) => v.status == "pending").toList();
+  List<VisitHive> get allVisits => _box.values.toList();
+  List<VisitHive> get completedVisits =>
+      allVisits.where((v) => v.status == "completed").toList();
+  List<VisitHive> get inProgressVisits =>
+      allVisits.where((v) => v.status == "in_progress").toList();
 
   bool get hasActiveVisit => currentVisit != null;
 
+  // --- START VISIT ---
   Future<bool> canStartVisit(CustomerHive c) async {
     return await locationService.isWithinGeofence(
       targetLat: c.lat,
@@ -34,69 +34,127 @@ class VisitProvider extends ChangeNotifier {
   }
 
   void startVisit(CustomerHive customer, LatLng gps) {
-    if (isVisited(customer.id)) {
-      // Optionally, you can throw an error or just return
-      return;
-    }
-
-    currentVisit = Visit(
+    final visit = VisitHive(
       id: _generateId(),
       customerId: customer.id,
       startTime: DateTime.now(),
       startLat: gps.latitude,
       startLng: gps.longitude,
+      status: "in_progress",
+      synced: true,
     );
 
-    _visits.add(currentVisit!); // NEW: store visit
+    _box.add(visit);
+    currentVisit = visit;
     notifyListeners();
   }
 
   void startVisitOffline(CustomerHive customer) {
-    if (isVisited(customer.id)) {
-      // Optionally, you can throw an error or just return
-      return;
-    }
-
-    currentVisit = Visit(
+    final visit = VisitHive(
       id: _generateId(),
       customerId: customer.id,
       startTime: DateTime.now(),
-      startLat: null,
-      startLng: null,
+      startLat: 0,
+      startLng: 0,
+      status: "in_progress",
+      synced: true,
     );
 
-    _visits.add(currentVisit!); // NEW: store visit
+    _box.add(visit);
+    currentVisit = visit;
     notifyListeners();
   }
 
-  void cancelVisit() {
-    if (currentVisit != null) {
-      currentVisit!.status = "canceled";
-    }
+  // --- ATTACH INVOICE ---
+  void attachInvoice(String invoiceId) {
+    if (currentVisit == null) return;
+    currentVisit!.invoiceId = invoiceId;
+    currentVisit!.synced = false;
+    currentVisit!.save();
+    notifyListeners();
+  }
+
+  // --- ADD EPOD ---
+  void addEPOD({
+    required String signaturePath,
+    required String photoPath,
+    required double deliveryLat,
+    required double deliveryLng,
+    String? notes,
+  }) {
+    if (currentVisit == null) return;
+
+    currentVisit!
+      ..signaturePath = signaturePath
+      ..photoPath = photoPath
+      ..deliveryLat = deliveryLat
+      ..deliveryLng = deliveryLng
+      ..notes = notes
+      ..synced = false;
+
+    currentVisit!.save();
+    notifyListeners();
+  }
+
+  // --- FINISH VISIT ---
+  void finishVisit(LatLng gps, CustomerProvider customerProvider) {
+    if (currentVisit == null) return;
+
+    currentVisit!
+      ..endTime = DateTime.now()
+      ..endLat = gps.latitude
+      ..endLng = gps.longitude
+      ..status = "completed"
+      ..synced = false;
+
+    currentVisit!.save();
+
+    customerProvider.markVisited(currentVisit!.customerId);
+
     currentVisit = null;
     notifyListeners();
   }
 
-  void finishVisit(LatLng gps, CustomerProvider customerProvider) {
+  // --- CANCEL VISIT ---
+  void cancelVisit() {
     if (currentVisit == null) return;
 
-    currentVisit!.endTime = DateTime.now();
-    currentVisit!.endLat = gps.latitude;
-    currentVisit!.endLng = gps.longitude;
-    currentVisit!.status = "completed";
+    currentVisit!
+      ..status = "canceled"
+      ..synced = false;
 
-    customerProvider.markVisited(currentVisit!.customerId);
-
+    currentVisit!.save();
+    currentVisit = null;
     notifyListeners();
   }
 
-  List<Visit> getVisitsForCustomer(int customerId) {
-    return _visits.where((v) => v.customerId == customerId).toList();
+  // --- RESET VISITS (END OF DAY) ---
+  Future<void> resetVisits() async {
+    await _box.clear();
+    currentVisit = null;
+    notifyListeners();
+  }
+
+  // --- HELPERS ---
+  void addDummyEPOD() {
+    if (currentVisit == null) return;
+
+    currentVisit!
+      ..signaturePath = "dummy_signature.png"
+      ..photoPath = "dummy_photo.png"
+      ..deliveryLat = 33.50
+      ..deliveryLng = 36.20
+      ..notes = "Dummy ePOD notes"
+      ..synced = false
+      ..invoiceId = "dummy_invoice_id";
+
+    currentVisit!.save();
+    notifyListeners();
   }
 
   bool isVisited(int customerId) {
-    return _visits.any(
-      (visit) => visit.customerId == customerId && visit.status == "completed",
+    return allVisits.any(
+      (v) => v.customerId == customerId && v.status == "completed",
     );
   }
 
@@ -104,21 +162,7 @@ class VisitProvider extends ChangeNotifier {
     return DateTime.now().millisecondsSinceEpoch + Random().nextInt(9999);
   }
 
-  Map<String, dynamic> get visitData {
-    final v = currentVisit;
-    if (v == null) return {};
-
-    return {
-      "id": v.id,
-      "visitId": v.id,
-      "customerId": v.customerId,
-      "startTime": v.startTime.toIso8601String(),
-      "startLat": v.startLat,
-      "startLng": v.startLng,
-      "endTime": v.endTime?.toIso8601String(),
-      "endLat": v.endLat,
-      "endLng": v.endLng,
-      "status": v.status,
-    };
+  List<VisitHive> getVisitsForCustomer(int customerId) {
+    return allVisits.where((v) => v.customerId == customerId).toList();
   }
 }

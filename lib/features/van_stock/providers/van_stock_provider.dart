@@ -13,12 +13,11 @@ class VanStockProvider extends ChangeNotifier {
 
   List<VanStockHive> get items => _box.values.toList();
 
-  /// TEMPORARY: load mock van stock, convert to Hive, store it
+  /// MORNING: Load today's van stock (reset)
   Future<void> loadVanStock() async {
     _isLoading = true;
     notifyListeners();
 
-    // 1. Mock data (temporary until backend is ready)
     await Future.delayed(Duration(milliseconds: 500));
 
     final mock = [
@@ -33,7 +32,6 @@ class VanStockProvider extends ChangeNotifier {
       VanStockHive(id: 4, name: "Pepsi 1L", price: 1200.0, quantity: 12),
     ];
 
-    // 2. Save mock data to Hive
     await _box.clear();
     await _local.saveAll(mock);
 
@@ -41,14 +39,15 @@ class VanStockProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Deduct quantity after invoice creation
+  /// DURING THE DAY: Deduct stock after invoice
   Future<void> deduct(int itemId, int amount) async {
     await _local.deductQuantity(itemId, amount);
     notifyListeners();
   }
 
-  /// Refresh van stock from Hive
-  Future<void> refresh() async {
+  /// END OF DAY: Reset stock
+  Future<void> resetStock() async {
+    await _box.clear();
     notifyListeners();
   }
 }

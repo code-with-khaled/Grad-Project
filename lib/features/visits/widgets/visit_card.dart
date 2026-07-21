@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/visits/models/visit_model.dart';
+import 'package:grad_project/features/visits/models/visit_hive.dart';
 
 class VisitCard extends StatelessWidget {
-  final Visit visit;
+  final VisitHive visit;
 
   const VisitCard({super.key, required this.visit});
 

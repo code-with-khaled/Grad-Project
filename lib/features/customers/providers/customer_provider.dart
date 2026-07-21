@@ -12,63 +12,54 @@ class CustomerProvider extends ChangeNotifier {
 
   List<CustomerHive> get customers => _box.values.toList();
 
-  /// TEMPORARY: load mock customers, convert to Hive, store them
+  /// MORNING: Load today's customers (reset)
   Future<void> loadCustomers() async {
     _isLoading = true;
     notifyListeners();
 
-    // 1. Mock data (your existing customers)
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration(milliseconds: 500));
+
     final mock = [
       CustomerHive(
-        name: "Customer 1",
         id: 1,
+        name: "Customer 1",
         address: "Address 1",
         phone: "Phone 1",
         lat: 33.54588821856537,
         lng: 36.21311734279374,
+        visited: false,
+        synced: true,
       ),
       CustomerHive(
-        name: "Customer 2",
         id: 2,
+        name: "Customer 2",
         address: "Address 2",
         phone: "Phone 2",
         lat: 33.51508,
         lng: 36.27764,
+        visited: false,
+        synced: true,
       ),
       CustomerHive(
-        name: "Customer 3",
         id: 3,
+        name: "Customer 3",
         address: "Address 3",
         phone: "Phone 3",
         lat: 33.5200,
         lng: 36.2880,
+        visited: false,
+        synced: true,
       ),
     ];
 
-    // 2. Convert mock → Hive model
-    final hiveList = mock.map((c) {
-      return CustomerHive(
-        id: c.id,
-        name: c.name,
-        address: c.address,
-        lat: c.lat,
-        lng: c.lng,
-        phone: c.phone,
-        visited: false,
-        synced: true,
-      );
-    }).toList();
-
-    // 3. Save to Hive
     await _box.clear();
-    await _box.addAll(hiveList);
+    await _box.addAll(mock);
 
     _isLoading = false;
     notifyListeners();
   }
 
-  /// Mark visited (offline)
+  /// DURING THE DAY: Mark visited
   Future<void> markVisited(int customerId) async {
     final c = _box.values.firstWhere((x) => x.id == customerId);
     c.visited = true;
@@ -77,7 +68,16 @@ class CustomerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// For route planning
+  /// END OF DAY: Reset visited flags
+  Future<void> resetCustomers() async {
+    for (final c in _box.values) {
+      c.visited = false;
+      c.synced = true;
+      await c.save();
+    }
+    notifyListeners();
+  }
+
   List<LatLng> getCustomerCoordinates() {
     return customers.map((c) => LatLng(c.lat, c.lng)).toList();
   }
