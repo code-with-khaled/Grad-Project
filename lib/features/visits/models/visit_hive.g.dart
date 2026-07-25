@@ -32,7 +32,7 @@ class VisitHiveAdapter extends TypeAdapter<VisitHive> {
       deliveryLng: fields[12] as double?,
       notes: fields[13] as String?,
       synced: fields[14] as bool,
-      invoiceId: fields[15] as String?,
+      invoiceId: fields[15] as int?,
     );
   }
 

@@ -3,7 +3,6 @@ import 'package:hive/hive.dart';
 
 import '../models/invoice_hive.dart';
 import '../models/invoice_item_hive.dart';
-import '../../van_stock/services/van_stock_local_service.dart';
 
 class InvoiceProvider extends ChangeNotifier {
   final Box<InvoiceHive> _box = Hive.box<InvoiceHive>('invoicesBox');
@@ -14,18 +13,20 @@ class InvoiceProvider extends ChangeNotifier {
     return _box.values.where((i) => i.visitId == visitId).toList();
   }
 
-  Future<void> addInvoice({
+  Future<int> addInvoice({
     required int customerId,
     required int visitId,
     required List<InvoiceItemHive> items,
   }) async {
+    final id = DateTime.now().millisecondsSinceEpoch;
+
     final total = items.fold(
       0.0,
       (sum, item) => sum + item.price * item.quantity,
     );
 
     final invoice = InvoiceHive(
-      id: DateTime.now().millisecondsSinceEpoch,
+      id: id,
       customerId: customerId,
       visitId: visitId,
       total: total,
@@ -35,13 +36,8 @@ class InvoiceProvider extends ChangeNotifier {
     );
 
     await _box.add(invoice);
-
-    // Deduct van stock
-    final vanStock = VanStockLocalService();
-    for (final item in items) {
-      await vanStock.deductQuantity(item.itemId, item.quantity);
-    }
-
     notifyListeners();
+
+    return id;
   }
 }

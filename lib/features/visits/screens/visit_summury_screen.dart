@@ -2,11 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/visits/models/visit_hive.dart';
-import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/invoices/screens/invoice_create_screen.dart';
-import 'package:grad_project/features/visits/screens/visit_completed_screen.dart';
-import 'package:grad_project/core/services/location_service.dart';
+import 'package:grad_project/features/visits/screens/epod_screen.dart';
 import 'package:provider/provider.dart';
 
 class VisitSummaryScreen extends StatefulWidget {
@@ -33,7 +31,6 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
   void initState() {
     super.initState();
 
-    // Start timer immediately
     _timer = Timer.periodic(Duration(seconds: 1), (_) {
       setState(() => _seconds++);
     });
@@ -41,13 +38,13 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
 
   @override
   void dispose() {
-    _timer.cancel(); // stop timer when leaving screen
+    _timer.cancel();
     super.dispose();
   }
 
   void _cancelVisit() {
     context.read<VisitProvider>().cancelVisit();
-    Navigator.pop(context); // go back to map
+    Navigator.pop(context);
   }
 
   String _formatTime(int seconds) {
@@ -61,10 +58,7 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Visit In Progress"),
-        leading: IconButton(
-          icon: Icon(Icons.close),
-          onPressed: _cancelVisit, // cancel instead of back
-        ),
+        leading: IconButton(icon: Icon(Icons.close), onPressed: _cancelVisit),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -80,7 +74,6 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
 
             SizedBox(height: 20),
 
-            // Timer
             Row(
               children: [
                 Icon(Icons.timer, size: 28),
@@ -116,35 +109,11 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () async {
-                  final visitProvider = context.read<VisitProvider>();
-                  final customerProvider = context.read<CustomerProvider>();
-                  final navigator = Navigator.of(context);
-
-                  final gps = await LocationService.getCurrentLocation();
-
-                  // Capture visit BEFORE finishing it
-                  final visit = visitProvider.currentVisit;
-
-                  visitProvider.addDummyEPOD();
-                  visitProvider.finishVisit(gps, customerProvider);
-
-                  // Build safe data map
-                  final data = {
-                    "id": visit!.id,
-                    "customerId": visit.customerId,
-                    "startTime": visit.startTime.toIso8601String(),
-                    "startLat": visit.startLat,
-                    "startLng": visit.startLng,
-                    "endTime": DateTime.now().toIso8601String(),
-                    "endLat": gps.latitude,
-                    "endLng": gps.longitude,
-                    "status": "completed",
-                  };
-
-                  navigator.pushReplacement(
+                onPressed: () {
+                  Navigator.push(
+                    context,
                     MaterialPageRoute(
-                      builder: (_) => VisitCompletedScreen(data: data),
+                      builder: (_) => EPODScreen(visit: widget.visit),
                     ),
                   );
                 },

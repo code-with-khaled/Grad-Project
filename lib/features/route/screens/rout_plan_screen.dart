@@ -216,7 +216,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     Future.microtask(() {
       if (!mounted) return;
 
-      _locationTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      _locationTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
         if (!mounted) return;
 
         try {
@@ -227,12 +227,12 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
           final current = userLocationProvider.current;
           if (current == null) return;
 
-          if (mounted) {
-            await routeProvider.getNavigationRoute(
-              current,
-              LatLng(_selectedCustomer!.lat, _selectedCustomer!.lng),
-            );
-          }
+          // if (mounted) {
+          //   await routeProvider.getNavigationRoute(
+          //     current,
+          //     LatLng(_selectedCustomer!.lat, _selectedCustomer!.lng),
+          //   );
+          // }ge
         } catch (e) {
           // ignore: avoid_print
           print('Error in location timer: $e');
@@ -341,7 +341,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
           ),
 
           // Navigation info box
-          if (routeProvider.navigationRoute.isNotEmpty)
+          if (routeProvider.navigationRoute.isNotEmpty || _isNavigating)
             Positioned(
               top: 20,
               left: 20,

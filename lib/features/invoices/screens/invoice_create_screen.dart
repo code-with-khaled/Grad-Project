@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:provider/provider.dart';
 
+import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
+import 'package:grad_project/features/visits/providers/visit_provider.dart';
 
 class InvoiceCreateScreen extends StatefulWidget {
   final VisitHive visit;
@@ -17,6 +18,9 @@ class InvoiceCreateScreen extends StatefulWidget {
 
 class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
   final List<InvoiceItemHive> _items = [];
+
+  double get total =>
+      _items.fold(0, (sum, item) => sum + (item.price * item.quantity));
 
   void _addItem() {
     final vanItems = context.read<VanStockProvider>().items;
@@ -34,7 +38,6 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
               onTap: () async {
                 final qtyController = TextEditingController();
 
-                // Ask for quantity
                 final qty = await showDialog<int>(
                   context: context,
                   builder: (_) => AlertDialog(
@@ -70,8 +73,7 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
                 }
 
                 if (!mounted) return;
-
-                Navigator.pop(context); // close bottom sheet
+                Navigator.pop(context);
               },
             );
           }).toList(),
@@ -80,14 +82,35 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
     );
   }
 
-  void _saveInvoice() {
-    context.read<InvoiceProvider>().addInvoice(
+  void _removeItem(int index) {
+    setState(() {
+      _items.removeAt(index);
+    });
+  }
+
+  Future<void> _saveInvoice() async {
+    final invoiceProvider = context.read<InvoiceProvider>();
+    final visitProvider = context.read<VisitProvider>();
+    final vanStockProvider = context.read<VanStockProvider>();
+
+    // 1. Create invoice
+    final invoiceId = await invoiceProvider.addInvoice(
       customerId: widget.visit.customerId,
       visitId: widget.visit.id,
       items: _items,
     );
 
-    Navigator.pop(context);
+    // 2. Deduct stock
+    for (final item in _items) {
+      await vanStockProvider.deduct(item.itemId, item.quantity);
+    }
+
+    // 3. Attach invoice to visit
+    visitProvider.attachInvoice(invoiceId);
+
+    // 4. Return invoiceId to VisitSummaryScreen
+    if (!mounted) return;
+    Navigator.pop(context, invoiceId);
   }
 
   @override
@@ -101,23 +124,45 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
-              children: _items.map((item) {
+            child: ListView.builder(
+              itemCount: _items.length,
+              itemBuilder: (_, index) {
+                final item = _items[index];
                 return ListTile(
                   title: Text(item.name),
                   subtitle: Text("${item.quantity} × ${item.price}"),
-                  trailing: Text(
-                    (item.price * item.quantity).toStringAsFixed(2),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text((item.price * item.quantity).toStringAsFixed(2)),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _removeItem(index),
+                      ),
+                    ],
                   ),
                 );
-              }).toList(),
+              },
             ),
           ),
+
+          // Total
           Padding(
             padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: _items.isEmpty ? null : _saveInvoice,
-              child: Text("Save Invoice"),
+            child: Column(
+              children: [
+                Text(
+                  "Total: ${total.toStringAsFixed(2)}",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 10),
+
+                ElevatedButton(
+                  onPressed: _items.isEmpty ? null : _saveInvoice,
+                  child: Text("Save Invoice"),
+                ),
+              ],
             ),
           ),
         ],

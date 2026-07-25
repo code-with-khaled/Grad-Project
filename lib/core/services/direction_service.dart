@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -23,6 +25,18 @@ class DirectionsService {
       headers: {"Authorization": _apiKey, "Content-Type": "application/json"},
       body: jsonEncode(body),
     );
+
+    if (response.statusCode == 429) {
+      print("ORS ERROR: ${response.statusCode}");
+      print("ORS BODY: ${response.body}");
+      throw Exception("ORS rate limit exceeded");
+    }
+
+    if (response.statusCode != 200) {
+      print("ORS ERROR: ${response.statusCode}");
+      print("ORS BODY: ${response.body}");
+      throw Exception("ORS returned HTML or error");
+    }
 
     final data = jsonDecode(response.body);
 

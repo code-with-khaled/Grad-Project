@@ -53,7 +53,7 @@ class VisitHive extends HiveObject {
 
   // Invoice linkage
   @HiveField(15)
-  String? invoiceId;
+  int? invoiceId;
 
   VisitHive({
     required this.id,

@@ -14,9 +14,9 @@ class NavigationInfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (distance == null || duration == null) {
-      return const SizedBox.shrink();
-    }
+    // if (distance == null || duration == null) {
+    //   return const SizedBox.shrink();
+    // }
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -28,14 +28,24 @@ class NavigationInfoBox extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            "Distance: ${(distance! / 1000).toStringAsFixed(2)} km",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "ETA: ${(duration! / 60).toStringAsFixed(0)} min",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          distance == null
+              ? const SizedBox.shrink()
+              : Text(
+                  "Distance: ${(distance! / 1000).toStringAsFixed(2)} km",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+          distance == null
+              ? const SizedBox.shrink()
+              : Text(
+                  "ETA: ${(duration! / 60).toStringAsFixed(0)} min",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
           GestureDetector(
             onTap: onCancel,
             child: const Icon(Icons.close, color: Colors.red, size: 22),

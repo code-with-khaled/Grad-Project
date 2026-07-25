@@ -66,7 +66,7 @@ class VisitProvider extends ChangeNotifier {
   }
 
   // --- ATTACH INVOICE ---
-  void attachInvoice(String invoiceId) {
+  void attachInvoice(int invoiceId) {
     if (currentVisit == null) return;
     currentVisit!.invoiceId = invoiceId;
     currentVisit!.synced = false;
@@ -146,7 +146,7 @@ class VisitProvider extends ChangeNotifier {
       ..deliveryLng = 36.20
       ..notes = "Dummy ePOD notes"
       ..synced = false
-      ..invoiceId = "dummy_invoice_id";
+      ..invoiceId = 12345;
 
     currentVisit!.save();
     notifyListeners();
