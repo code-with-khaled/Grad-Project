@@ -5,4 +5,5 @@ class HiveBoxes {
   static const invoices = 'invoicesBox';
   static const visits = 'visitsBox';
   static const epod = 'epodBox';
+  static const gpsPoints = 'gpsPointsBox';
 }

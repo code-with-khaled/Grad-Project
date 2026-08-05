@@ -4,6 +4,9 @@ import 'package:grad_project/core/storage/hive_boxes.dart';
 import 'package:grad_project/features/auth/services/auth_service.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/gps/data/gps_background_service.dart';
+import 'package:grad_project/features/gps/data/gps_repository.dart';
+import 'package:grad_project/features/gps/models/gps_point_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
@@ -16,6 +19,7 @@ import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/auth/screens/login_screen.dart';
 import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
+import 'package:grad_project/features/workday/providers/workday_provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
@@ -29,13 +33,16 @@ void main() async {
   Hive.registerAdapter(InvoiceHiveAdapter());
   Hive.registerAdapter(InvoiceItemHiveAdapter());
   Hive.registerAdapter(VisitHiveAdapter());
+  Hive.registerAdapter(GpsPointHiveAdapter());
 
   await Hive.openBox(HiveBoxes.authBox);
   await Hive.openBox<CustomerHive>(HiveBoxes.customers);
   await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
   await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
   await Hive.openBox<VisitHive>(HiveBoxes.visits);
-  await Hive.openBox(HiveBoxes.epod);
+  final gpsBox = await Hive.openBox<GpsPointHive>(HiveBoxes.gpsPoints);
+  final gpsRepo = GpsRepository(gpsBox);
+  final gpsService = GpsBackgroundService(gpsRepo);
 
   runApp(
     MultiProvider(
@@ -45,6 +52,9 @@ void main() async {
           create: (_) => AuthProvider(authService: AuthService()),
         ),
         ChangeNotifierProvider(create: (_) => VanStockProvider()),
+        Provider(create: (_) => gpsRepo),
+        Provider(create: (_) => gpsService),
+        ChangeNotifierProvider(create: (_) => WorkdayProvider(gpsService)),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),

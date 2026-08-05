@@ -1,6 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/gps/data/gps_repository.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
+import 'package:grad_project/features/workday/providers/workday_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -10,6 +14,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final customerProvider = context.read<CustomerProvider>();
     final vanStockProvider = context.read<VanStockProvider>();
+    final workdayProvider = context.watch<WorkdayProvider>();
 
     return Scaffold(
       appBar: AppBar(title: Text("Home")),
@@ -18,19 +23,46 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
+              onPressed: workdayProvider.isWorkdayActive
+                  ? null
+                  : () {
+                      workdayProvider.startWorkday();
+                    },
+              child: Text("Start Workday"),
+            ),
+
+            SizedBox(height: 20),
+
+            ElevatedButton(
               onPressed: () {
                 customerProvider.loadCustomers();
                 vanStockProvider.loadVanStock();
               },
               child: Text("Load Today's Plan"),
             ),
-            SizedBox(height: 20),
+
             ElevatedButton(
               onPressed: () {
+                workdayProvider.endWorkday();
                 customerProvider.resetCustomers();
                 vanStockProvider.resetStock();
               },
               child: Text("End Day / Reset"),
+            ),
+
+            SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: () {
+                final gpsRepo = context.read<GpsRepository>();
+                final points = gpsRepo.getUnsyncedPoints();
+
+                print("---- GPS POINTS IN HIVE ----");
+                for (final p in points) {
+                  print("${p.lat}, ${p.lng} at ${p.timestamp}");
+                }
+              },
+              child: Text("Print GPS Points"),
             ),
           ],
         ),
