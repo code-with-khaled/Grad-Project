@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: _phoneController,
-              keyboardType: TextInputType.phone,
+              // keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
                 labelText: 'Phone Number',
                 border: OutlineInputBorder(),
@@ -50,18 +50,36 @@ class _LoginScreenState extends State<LoginScreen> {
             authProvider.isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
+                    // onPressed: () async {
+                    //   final phone = _phoneController.text.trim();
+                    //   final password = _passwordController.text.trim();
+                    //   final navigator = Navigator.of(context);
+
+                    //   await authProvider.login(phone, password);
+
+                    //   if (authProvider.accessToken != null) {
+                    //     navigator.push(
+                    //       MaterialPageRoute(
+                    //         builder: (context) => const MainLayout(),
+                    //       ),
+                    //     );
+                    //   }
+                    // },
                     onPressed: () async {
-                      final phone = _phoneController.text.trim();
+                      final username = _phoneController.text.trim();
                       final password = _passwordController.text.trim();
+
+                      final authProvider = context.read<AuthProvider>();
                       final navigator = Navigator.of(context);
 
-                      await authProvider.login(phone, password);
+                      final success = await authProvider.login(
+                        username,
+                        password,
+                      );
 
-                      if (authProvider.accessToken != null) {
-                        navigator.push(
-                          MaterialPageRoute(
-                            builder: (context) => const MainLayout(),
-                          ),
+                      if (success) {
+                        navigator.pushReplacement(
+                          MaterialPageRoute(builder: (_) => const MainLayout()),
                         );
                       }
                     },

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/customers/screens/customer_list_screen.dart';
 import 'package:grad_project/features/home/screens/home_screen.dart';
 import 'package:grad_project/features/invoices/screens/invoices_screen.dart';
 import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
 import 'package:grad_project/features/visits/screens/visits_screen.dart';
+import 'package:provider/provider.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -18,6 +20,22 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Sales Rep App"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+
+              await context.read<AuthProvider>().logout();
+
+              navigator.pushReplacementNamed("/login");
+            },
+          ),
+        ],
+      ),
+
       body: IndexedStack(
         index: _currentIndex,
         children: const [

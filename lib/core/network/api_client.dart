@@ -5,7 +5,7 @@ import 'package:grad_project/core/storage/token_storage.dart';
 class ApiClient {
   static final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "http://localhost:8080",
+      baseUrl: "https://hardly-garbage-tacky.ngrok-free.dev/api",
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       sendTimeout: const Duration(seconds: 10),
@@ -14,7 +14,13 @@ class ApiClient {
   );
 
   static void init(TokenStorage storage) {
-    _dio.interceptors.add(AuthInterceptor(getToken: storage.getToken));
+    _dio.interceptors.add(
+      AuthInterceptor(
+        getToken: storage.getToken,
+        getRefreshToken: storage.getRefreshToken,
+        saveToken: storage.saveToken,
+      ),
+    );
   }
 
   static Dio get instance => _dio;

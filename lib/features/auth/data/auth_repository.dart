@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:grad_project/core/network/error_handler.dart';
 import 'package:grad_project/core/storage/token_storage.dart';
 import 'auth_api_service.dart';
 import 'auth_dto.dart';
@@ -9,20 +11,30 @@ class AuthRepository {
   AuthRepository(this._api, this._storage);
 
   Future<bool> login(String username, String password) async {
-    final dto = LoginRequestDto(username: username, password: password);
+    try {
+      final dto = LoginRequestDto(username: username, password: password);
+      final result = await _api.login(dto);
 
-    final result = await _api.login(dto);
+      await _storage.saveToken(result.token);
+      await _storage.saveRefreshToken(result.refreshToken);
+      await _storage.saveRepId(result.repId);
 
-    await _storage.saveToken(result.token);
-    await _storage.saveRefreshToken(result.refreshToken);
-    await _storage.saveRepId(result.repId);
-
-    return true;
+      return true;
+    } catch (e) {
+      if (e is DioException) {
+        throw ErrorHandler.parse(e);
+      }
+      throw "Unexpected error";
+    }
   }
 
   Future<void> logout() async {
     await _api.logout();
     await _storage.clear();
+  }
+
+  Future<String?> getToken() async {
+    return _storage.getToken();
   }
 
   Future<void> refresh() async {

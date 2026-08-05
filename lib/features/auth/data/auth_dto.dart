@@ -4,7 +4,7 @@ class LoginRequestDto {
 
   LoginRequestDto({required this.username, required this.password});
 
-  Map<String, dynamic> toJson() => {"username": username, "password": password};
+  Map<String, dynamic> toJson() => {"email": username, "password": password};
 }
 
 class LoginResponseDto {
@@ -19,10 +19,12 @@ class LoginResponseDto {
   });
 
   factory LoginResponseDto.fromJson(Map<String, dynamic> json) {
+    final data = json["data"];
+
     return LoginResponseDto(
-      token: json["token"],
-      refreshToken: json["refreshToken"],
-      repId: json["repId"],
+      token: data["accessToken"],
+      refreshToken: data["refreshToken"],
+      repId: data["userId"],
     );
   }
 }

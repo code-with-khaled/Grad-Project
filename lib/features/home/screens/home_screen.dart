@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/gps/data/gps_background_service.dart';
 import 'package:grad_project/features/gps/data/gps_repository.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 import 'package:grad_project/features/workday/providers/workday_provider.dart';
@@ -29,6 +30,22 @@ class HomeScreen extends StatelessWidget {
                       workdayProvider.startWorkday();
                     },
               child: Text("Start Workday"),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                final gpsService = context.read<GpsBackgroundService>();
+                gpsService.startForegroundTest();
+              },
+              child: Text("Start Foreground GPS Test"),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                final gpsService = context.read<GpsBackgroundService>();
+                gpsService.stopForegroundTest();
+              },
+              child: Text("Stop Foreground GPS Test"),
             ),
 
             SizedBox(height: 20),
