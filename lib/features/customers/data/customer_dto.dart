@@ -22,9 +22,9 @@ class CustomerDto {
       id: json["id"],
       name: json["name"],
       address: json["address"],
-      lat: (json["lat"] as num).toDouble(),
-      lng: (json["lng"] as num).toDouble(),
-      phone: json["phone"],
+      lat: (json["latitude"] as num).toDouble(),
+      lng: (json["longitude"] as num).toDouble(),
+      phone: json["phone"] ?? "N/A",
     );
   }
 

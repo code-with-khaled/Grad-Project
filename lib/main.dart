@@ -5,6 +5,8 @@ import 'package:grad_project/core/storage/hive_boxes.dart';
 import 'package:grad_project/core/storage/token_storage.dart';
 import 'package:grad_project/features/auth/data/auth_api_service.dart';
 import 'package:grad_project/features/auth/data/auth_repository.dart';
+import 'package:grad_project/features/customers/data/customer_api_service.dart';
+import 'package:grad_project/features/customers/data/customer_repository.dart';
 // import 'package:grad_project/features/auth/services/auth_service.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
@@ -43,7 +45,7 @@ void main() async {
 
   // Open Hive boxes
   final authBox = await Hive.openBox(HiveBoxes.authBox);
-  await Hive.openBox<CustomerHive>(HiveBoxes.customers);
+  final customerBox = await Hive.openBox<CustomerHive>(HiveBoxes.customers);
   await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
   await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
   await Hive.openBox<VisitHive>(HiveBoxes.visits);
@@ -66,6 +68,10 @@ void main() async {
   final gpsRepo = GpsRepository(gpsBox, gpsApi);
   final gpsService = GpsBackgroundService(gpsRepo);
 
+  // Customers
+  final customerApi = CustomerApiService(dio);
+  final customerRepo = CustomerRepository(customerApi, customerBox);
+
   runApp(
     MultiProvider(
       providers: [
@@ -78,7 +84,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => WorkdayProvider(gpsService)),
 
         // CORE FEATURES
-        ChangeNotifierProvider(create: (_) => CustomerProvider()),
+        ChangeNotifierProvider(create: (_) => CustomerProvider(customerRepo)),
         ChangeNotifierProvider(create: (_) => VanStockProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
