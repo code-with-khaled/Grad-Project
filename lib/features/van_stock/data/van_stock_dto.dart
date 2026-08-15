@@ -1,33 +1,44 @@
+import 'package:grad_project/features/van_stock/data/product_dto.dart';
 import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
 
 class VanStockDto {
-  final int itemId;
-  final String name;
+  final int id;
+  final int representativeId;
+  final String representativeName;
   final int quantity;
-  final double price;
+  final ProductDto product;
 
   VanStockDto({
-    required this.itemId,
-    required this.name,
+    required this.id,
+    required this.representativeId,
+    required this.representativeName,
     required this.quantity,
-    required this.price,
+    required this.product,
   });
 
   factory VanStockDto.fromJson(Map<String, dynamic> json) {
     return VanStockDto(
-      itemId: json["itemId"],
-      name: json["name"],
+      id: json["id"],
+      representativeId: json["representativeId"],
+      representativeName: json["representativeName"],
       quantity: json["quantity"],
-      price: (json["price"] as num).toDouble(),
+      product: ProductDto.fromJson(json["product"]),
     );
   }
+}
 
+extension VanStockMapper on VanStockDto {
   VanStockHive toHive() {
     return VanStockHive(
-      id: itemId,
-      name: name,
+      id: id,
+      productId: product.id,
+      name: product.name,
+      sku: product.sku,
+      barcode: product.barcode,
+      price: product.price,
+      unitOfMeasure: product.unitOfMeasure,
+      minStockLevel: product.minStockLevel,
       quantity: quantity,
-      price: price,
       synced: true,
     );
   }

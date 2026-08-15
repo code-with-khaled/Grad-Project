@@ -28,7 +28,7 @@ class Endpoints {
   static String submitInvoice(int id) => "/invoices/$id/submit";
 
   // Van stock
-  static String vanStock(int repId) => "/van-stock/$repId";
+  static String vanStock(int repId) => "/inventory/van/$repId";
 
   // GPS tracking
   static const trackingBatch = "/tracking/points/batch";

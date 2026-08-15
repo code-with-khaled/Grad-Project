@@ -20,6 +20,8 @@ import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
+import 'package:grad_project/features/van_stock/data/van_stock_api_service.dart';
+import 'package:grad_project/features/van_stock/data/van_stock_repository.dart';
 import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 import 'package:grad_project/features/visits/models/visit_hive.dart';
@@ -46,7 +48,7 @@ void main() async {
   // Open Hive boxes
   final authBox = await Hive.openBox(HiveBoxes.authBox);
   final customerBox = await Hive.openBox<CustomerHive>(HiveBoxes.customers);
-  await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
+  final vanstockBox = await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
   await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
   await Hive.openBox<VisitHive>(HiveBoxes.visits);
   final gpsBox = await Hive.openBox<GpsPointHive>(HiveBoxes.gpsPoints);
@@ -72,6 +74,10 @@ void main() async {
   final customerApi = CustomerApiService(dio);
   final customerRepo = CustomerRepository(customerApi, customerBox);
 
+  // Van Stock
+  final vanstockApi = VanStockApiService(dio);
+  final vanstockRepo = VanStockRepository(vanstockApi, vanstockBox);
+
   runApp(
     MultiProvider(
       providers: [
@@ -85,7 +91,7 @@ void main() async {
 
         // CORE FEATURES
         ChangeNotifierProvider(create: (_) => CustomerProvider(customerRepo)),
-        ChangeNotifierProvider(create: (_) => VanStockProvider()),
+        ChangeNotifierProvider(create: (_) => VanStockProvider(vanstockRepo)),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
         ChangeNotifierProvider(

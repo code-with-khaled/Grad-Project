@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/foundation.dart';
 // import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:grad_project/features/auth/data/auth_repository.dart';
+import 'package:grad_project/features/auth/models/user.dart';
 // import 'package:grad_project/features/auth/services/auth_service.dart';
 
 // class AuthProvider extends ChangeNotifier {
@@ -62,6 +65,8 @@ class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  User? user;
+
   AuthProvider({required this.repo});
 
   Future<bool> login(String username, String password) async {
@@ -70,11 +75,14 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await repo.login(username, password);
+      final result = await repo.login(username, password);
+      user = result.user;
+
+      print(user);
 
       isLoading = false;
       notifyListeners();
-      return success;
+      return true;
     } catch (e) {
       isLoading = false;
       error = "Login failed: $e";
@@ -85,6 +93,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await repo.logout();
+    user = null;
     notifyListeners();
   }
 

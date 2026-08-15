@@ -18,26 +18,41 @@ class VanStockHiveAdapter extends TypeAdapter<VanStockHive> {
     };
     return VanStockHive(
       id: fields[0] as int,
-      name: fields[1] as String,
-      price: fields[2] as double,
-      quantity: fields[3] as int,
-      synced: fields[4] as bool,
+      productId: fields[1] as int,
+      name: fields[2] as String,
+      sku: fields[3] as String,
+      barcode: fields[4] as String,
+      price: fields[5] as double,
+      unitOfMeasure: fields[6] as String,
+      minStockLevel: fields[7] as int,
+      quantity: fields[8] as int,
+      synced: fields[9] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, VanStockHive obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.name)
+      ..write(obj.productId)
       ..writeByte(2)
-      ..write(obj.price)
+      ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.quantity)
+      ..write(obj.sku)
       ..writeByte(4)
+      ..write(obj.barcode)
+      ..writeByte(5)
+      ..write(obj.price)
+      ..writeByte(6)
+      ..write(obj.unitOfMeasure)
+      ..writeByte(7)
+      ..write(obj.minStockLevel)
+      ..writeByte(8)
+      ..write(obj.quantity)
+      ..writeByte(9)
       ..write(obj.synced);
   }
 

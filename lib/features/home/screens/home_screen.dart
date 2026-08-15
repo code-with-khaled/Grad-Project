@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/gps/data/gps_background_service.dart';
 import 'package:grad_project/features/gps/data/gps_repository.dart';
@@ -16,6 +17,8 @@ class HomeScreen extends StatelessWidget {
     final customerProvider = context.read<CustomerProvider>();
     final vanStockProvider = context.read<VanStockProvider>();
     final workdayProvider = context.watch<WorkdayProvider>();
+    final auth = context.read<AuthProvider>();
+    final repId = auth.user!.id;
 
     return Scaffold(
       appBar: AppBar(title: Text("Home")),
@@ -51,9 +54,21 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 20),
 
             ElevatedButton(
-              onPressed: () {
-                customerProvider.loadCustomers();
-                vanStockProvider.loadVanStock();
+              onPressed: () async {
+                await customerProvider.loadCustomers();
+                final success = await vanStockProvider.loadVanStock(repId!);
+
+                if (!context.mounted) return;
+
+                final message = success
+                    ? "Van stock loaded successfully!"
+                    : "Failed to load van stock";
+
+                final color = success ? Colors.green : Colors.red;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(message), backgroundColor: color),
+                );
               },
               child: Text("Load Today's Plan"),
             ),

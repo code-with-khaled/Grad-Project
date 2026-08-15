@@ -8,21 +8,41 @@ class VanStockHive extends HiveObject {
   int id;
 
   @HiveField(1)
-  String name;
+  int productId;
 
   @HiveField(2)
-  double price;
+  String name;
 
   @HiveField(3)
-  int quantity;
+  String sku;
 
   @HiveField(4)
+  String barcode;
+
+  @HiveField(5)
+  double price;
+
+  @HiveField(6)
+  String unitOfMeasure;
+
+  @HiveField(7)
+  int minStockLevel;
+
+  @HiveField(8)
+  int quantity;
+
+  @HiveField(9)
   bool synced;
 
   VanStockHive({
     required this.id,
+    required this.productId,
     required this.name,
+    required this.sku,
+    required this.barcode,
     required this.price,
+    required this.unitOfMeasure,
+    required this.minStockLevel,
     required this.quantity,
     this.synced = true,
   });

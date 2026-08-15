@@ -1,3 +1,4 @@
+import 'package:grad_project/features/van_stock/data/van_stock_dto.dart';
 import 'package:hive/hive.dart';
 import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
 import 'van_stock_api_service.dart';
@@ -11,8 +12,9 @@ class VanStockRepository {
   Future<void> syncVanStock(int repId) async {
     final remote = await _api.fetchVanStock(repId);
 
+    await _box.clear();
     for (final dto in remote) {
-      _box.put(dto.itemId, dto.toHive());
+      _box.put(dto.product.id, dto.toHive());
     }
   }
 
@@ -32,5 +34,9 @@ class VanStockRepository {
     item.synced = false;
 
     await item.save();
+  }
+
+  Future<void> resetStock() async {
+    await _box.clear();
   }
 }
