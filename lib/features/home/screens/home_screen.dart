@@ -1,62 +1,174 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:grad_project/features/home/widgets/today_metric_card.dart';
+import 'package:provider/provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
-import 'package:grad_project/features/gps/data/gps_background_service.dart';
-import 'package:grad_project/features/gps/data/gps_repository.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 import 'package:grad_project/features/workday/providers/workday_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:grad_project/features/gps/data/gps_background_service.dart';
+import 'package:grad_project/features/gps/data/gps_repository.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final workdayProvider = context.watch<WorkdayProvider>();
     final customerProvider = context.read<CustomerProvider>();
     final vanStockProvider = context.read<VanStockProvider>();
-    final workdayProvider = context.watch<WorkdayProvider>();
-    final auth = context.read<AuthProvider>();
-    final repId = auth.user!.id;
+    final repId = auth.user?.id ?? 1;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Home")),
-      body: Center(
+      backgroundColor: Colors.grey.shade100,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60),
+        child: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          title: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Good morning, ${auth.user?.name ?? "Rep"}",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 3),
+              Text(
+                "Thursday, Oct 12 • Central Route",
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+          centerTitle: false,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 24),
+              child: Icon(Icons.notifications_active),
+            ),
+          ],
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton(
+            // ---------------------------
+            // TODAY’S METRICS SECTION
+            // ---------------------------
+            TodayMetricCard(),
+
+            // _metricCard(
+            //   title: "Visits Done",
+            //   value: "12 / 18",
+            //   subtitle: "66% complete",
+            //   icon: Icons.location_on,
+            //   color: Colors.blue,
+            // ),
+
+            // const SizedBox(height: 12),
+
+            // _metricCard(
+            //   title: "Total Sales",
+            //   value: "\$4,320",
+            //   subtitle: "Target: \$5,000",
+            //   icon: Icons.attach_money,
+            //   color: Colors.green,
+            // ),
+
+            // const SizedBox(height: 12),
+
+            // _metricCard(
+            //   title: "Commission",
+            //   value: "\$86.40",
+            //   subtitle: "\$113.60 to Tier 2",
+            //   icon: Icons.trending_up,
+            //   color: Colors.orange,
+            // ),
+            const SizedBox(height: 24),
+
+            // Motivational message
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: RichText(
+                text: TextSpan(
+                  style: TextStyle(fontSize: 15, color: Colors.black),
+                  children: [
+                    TextSpan(text: "Keep going! Only "),
+                    TextSpan(
+                      text: "\$5,680",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text:
+                          " left to hit your daily \$10K commission target 💪🏻",
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ---------------------------
+            // ACTION BUTTONS
+            // ---------------------------
+            _primaryButton(
+              label: "Start Workday",
+              icon: null,
+              color: Colors.blue,
               onPressed: workdayProvider.isWorkdayActive
                   ? null
                   : () {
                       workdayProvider.startWorkday();
                     },
-              child: Text("Start Workday"),
             ),
 
-            ElevatedButton(
+            const SizedBox(height: 12),
+
+            _primaryButton(
+              label: "Start Foreground GPS Test",
+              icon: Icons.play_arrow,
+              color: Colors.deepPurple,
               onPressed: () {
                 final gpsService = context.read<GpsBackgroundService>();
                 gpsService.startForegroundTest();
               },
-              child: Text("Start Foreground GPS Test"),
             ),
 
-            ElevatedButton(
+            const SizedBox(height: 12),
+
+            _primaryButton(
+              label: "Stop Foreground GPS Test",
+              icon: Icons.play_arrow,
+              color: Colors.deepPurple,
               onPressed: () {
                 final gpsService = context.read<GpsBackgroundService>();
                 gpsService.stopForegroundTest();
               },
-              child: Text("Stop Foreground GPS Test"),
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 12),
 
-            ElevatedButton(
+            _primaryButton(
+              label: "Load Today's Plan",
+              icon: Icons.play_arrow,
+              color: Colors.deepPurple,
               onPressed: () async {
                 await customerProvider.loadCustomers();
-                final success = await vanStockProvider.loadVanStock(repId!);
+                final success = await vanStockProvider.loadVanStock(repId);
 
                 if (!context.mounted) return;
 
@@ -70,21 +182,14 @@ class HomeScreen extends StatelessWidget {
                   SnackBar(content: Text(message), backgroundColor: color),
                 );
               },
-              child: Text("Load Today's Plan"),
             ),
 
-            ElevatedButton(
-              onPressed: () {
-                workdayProvider.endWorkday();
-                customerProvider.resetCustomers();
-                vanStockProvider.resetStock();
-              },
-              child: Text("End Day / Reset"),
-            ),
+            const SizedBox(height: 12),
 
-            SizedBox(height: 20),
-
-            ElevatedButton(
+            _primaryButton(
+              label: "Load Today's Plan",
+              icon: Icons.play_arrow,
+              color: Colors.deepPurple,
               onPressed: () {
                 final gpsRepo = context.read<GpsRepository>();
                 final points = gpsRepo.getUnsyncedPoints();
@@ -94,10 +199,249 @@ class HomeScreen extends StatelessWidget {
                   print("${p.lat}, ${p.lng} at ${p.timestamp}");
                 }
               },
-              child: Text("Print GPS Points"),
+            ),
+
+            const SizedBox(height: 12),
+
+            _primaryButton(
+              label: "Finish Day & Clear Stock",
+              icon: Icons.check_circle,
+              color: Colors.redAccent,
+              onPressed: () {
+                workdayProvider.endWorkday();
+                customerProvider.resetCustomers();
+                vanStockProvider.resetStock();
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // ---------------------------
+            // SUMMARY BOXES
+            // ---------------------------
+            Row(
+              children: [
+                Expanded(
+                  child: _summaryBox(
+                    title: "Route",
+                    value: "66% Done",
+                    icon: Icons.route,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _summaryBox(
+                    title: "Avg Order",
+                    value: "\$360.00",
+                    icon: Icons.shopping_cart,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _summaryBox(
+                    title: "Ranking",
+                    value: "#3 of 12",
+                    icon: Icons.leaderboard,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            // ---------------------------
+            // RECENT ACTIVITY
+            // ---------------------------
+            Text(
+              "RECENT ACTIVITY",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            _activityItem(
+              title: "Delivered to Al-Noor Market",
+              subtitle: "\$340.00 · Cash Payment",
+              time: "10 mins ago",
+              icon: Icons.local_shipping,
+            ),
+
+            _activityItem(
+              title: "Vanstock synced successfully",
+              subtitle: "42 SKU items updated",
+              time: "45 mins ago",
+              icon: Icons.sync,
+            ),
+
+            _activityItem(
+              title: "Visit skipped: Super Price Mart",
+              subtitle: "Store closed temporarily",
+              time: "2 hrs ago",
+              icon: Icons.warning_amber,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ---------------------------
+  // WIDGET HELPERS
+  // ---------------------------
+
+  // Widget _metricCard({
+  //   required String title,
+  //   required String value,
+  //   required String subtitle,
+  //   required IconData icon,
+  //   required Color color,
+  // }) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(14),
+  //       boxShadow: [
+  //         BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+  //       ],
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         CircleAvatar(
+  //           radius: 22,
+  //           backgroundColor: color.withValues(alpha: 0.15),
+  //           child: Icon(icon, color: color, size: 24),
+  //         ),
+  //         const SizedBox(width: 16),
+  //         Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               title,
+  //               style: const TextStyle(
+  //                 fontSize: 15,
+  //                 fontWeight: FontWeight.w600,
+  //               ),
+  //             ),
+  //             Text(
+  //               value,
+  //               style: const TextStyle(
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //             Text(
+  //               subtitle,
+  //               style: const TextStyle(fontSize: 13, color: Colors.black54),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _primaryButton({
+    required String label,
+    required IconData? icon,
+    required Color color,
+    bool disabled = false,
+    required VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: ElevatedButton.icon(
+        onPressed: disabled ? null : onPressed,
+        icon: Icon(icon),
+        label: Text(label, style: const TextStyle(fontSize: 16)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          disabledBackgroundColor: Colors.grey.shade400,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _summaryBox({
+    required String title,
+    required String value,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.deepPurple),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _activityItem({
+    required String title,
+    required String subtitle,
+    required String time,
+    required IconData icon,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.deepPurple, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            time,
+            style: const TextStyle(fontSize: 12, color: Colors.black45),
+          ),
+        ],
       ),
     );
   }
