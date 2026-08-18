@@ -28,15 +28,19 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.storefront, size: 80, color: Colors.deepPurple),
-              const SizedBox(height: 16),
+              // Icon(Icons.storefront, size: 80, color: Colors.deepPurple),
+              Image.asset(
+                "assets/logo.png", // your PNG
+                width: 120,
+                height: 120,
+              ),
 
               Text(
                 "Sales Portal",
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple.shade700,
+                  color: Colors.deepPurple,
                 ),
               ),
               const SizedBox(height: 8),

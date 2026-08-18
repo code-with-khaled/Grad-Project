@@ -8,8 +8,8 @@ import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 import 'package:grad_project/features/workday/providers/workday_provider.dart';
-import 'package:grad_project/features/gps/data/gps_background_service.dart';
-import 'package:grad_project/features/gps/data/gps_repository.dart';
+// import 'package:grad_project/features/gps/data/gps_background_service.dart';
+// import 'package:grad_project/features/gps/data/gps_repository.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,9 +17,13 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    // ignore: unused_local_variable
     final workdayProvider = context.watch<WorkdayProvider>();
+    // ignore: unused_local_variable
     final customerProvider = context.read<CustomerProvider>();
+    // ignore: unused_local_variable
     final vanStockProvider = context.read<VanStockProvider>();
+    // ignore: unused_local_variable
     final repId = auth.user?.id ?? 1;
 
     return Scaffold(
@@ -330,6 +334,7 @@ class HomeScreen extends StatelessWidget {
   // WIDGET HELPERS
   // ---------------------------
 
+  // ignore: unused_element
   Widget _primaryButton({
     required String label,
     required IconData? icon,

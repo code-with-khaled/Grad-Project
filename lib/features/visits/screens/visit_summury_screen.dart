@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
+import 'package:grad_project/features/invoices/models/invoice_hive.dart';
+import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
+import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/invoices/screens/invoice_create_screen.dart';
@@ -53,6 +56,32 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
     return "$m:$s";
   }
 
+  final dummyInvoices = [
+    InvoiceHive(
+      id: 1,
+      customerId: 1,
+      visitId: 1,
+      total: 150.0,
+      createdAt: DateTime.now(),
+      items: [
+        InvoiceItemHive(itemId: 1, name: "Item A", quantity: 2, price: 50.0),
+        InvoiceItemHive(itemId: 2, name: "Item B", quantity: 1, price: 50.0),
+      ],
+      synced: false,
+    ),
+    InvoiceHive(
+      id: 2,
+      customerId: 1,
+      visitId: 1,
+      total: 200.0,
+      createdAt: DateTime.now(),
+      items: [
+        InvoiceItemHive(itemId: 3, name: "Item C", quantity: 4, price: 50.0),
+      ],
+      synced: false,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,7 +107,7 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
         leading: IconButton(icon: Icon(Icons.close), onPressed: _cancelVisit),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(18),
+        padding: EdgeInsets.fromLTRB(18, 18, 18, 480),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -178,70 +207,190 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
                   ),
                 ),
 
-                SizedBox(
-                  height: 35,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              InvoiceCreateScreen(visit: widget.visit),
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      Icons.receipt_long_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    label: Text(
-                      "Add Invoice",
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple.shade400,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            InvoiceCreateScreen(visit: widget.visit),
                       ),
-                    ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.receipt_long_outlined,
+                        color: Colors.deepPurple.shade400,
+                        size: 22,
+                      ),
+                      SizedBox(width: 5),
+
+                      Text(
+                        "Add Invoice",
+                        style: TextStyle(
+                          color: Colors.deepPurple.shade400,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EPODScreen(visit: widget.visit),
+            Consumer<InvoiceProvider>(
+              builder: (context, provider, _) {
+                // ignore: unused_local_variable
+                final invoices = provider.getInvoicesForVisit(widget.visit.id);
+
+                if (dummyInvoices.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: Center(
+                      child: Text(
+                        "No invoices created yet.",
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: dummyInvoices.map((invoice) {
+                    return Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Invoice #${invoice.id}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade50,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 16,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.delete_forever_outlined,
+                                        size: 16,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 6),
+
+                          Text(
+                            "Total: ${invoice.total.toStringAsFixed(2)}",
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 15,
+                            ),
+                          ),
+
+                          SizedBox(height: 6),
+
+                          Text(
+                            "Created: ${invoice.createdAt.toLocal().toString().substring(0, 16)}",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                          ),
+
+                          SizedBox(height: 12),
+
+                          // Items preview
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: invoice.items.map((item) {
+                              return Text(
+                                "• ${item.name} — ${item.quantity} × ${item.price}",
+                                style: TextStyle(fontSize: 14),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ),
                     );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "Finish Visit & Resume",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
+                  }).toList(),
+                );
+              },
             ),
           ],
+        ),
+      ),
+
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24),
+        child: SizedBox(
+          width: double.infinity,
+          height: 55,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EPODScreen(visit: widget.visit),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Finish Visit & Resume",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ),
       ),
     );

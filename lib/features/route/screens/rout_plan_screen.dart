@@ -326,12 +326,18 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
           if (totalCount > 0)
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: Center(
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Text(
-                  "$visitedCount/$totalCount",
-                  style: const TextStyle(
+                  "$visitedCount/$totalCount COMPLETED",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.deepPurple.shade400,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
               ),
@@ -423,12 +429,12 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 final customer = _nextCustomer!;
                 final order = customerProvider.customers.indexOf(customer) + 1;
 
-                final ok = await visitProvider.canStartVisit(customer);
+                // final ok = await visitProvider.canStartVisit(customer);
 
-                if (!ok) {
-                  showSnack("You must be near the customer to start a visit.");
-                  return;
-                }
+                // if (!ok) {
+                //   showSnack("You must be near the customer to start a visit.");
+                //   return;
+                // }
 
                 try {
                   final gps = await LocationService.getCurrentLocation();
