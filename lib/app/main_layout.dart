@@ -20,22 +20,21 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sales Rep App"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              final navigator = Navigator.of(context);
+      // appBar: AppBar(
+      //   title: const Text("Sales Rep App"),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.logout),
+      //       onPressed: () async {
+      //         final navigator = Navigator.of(context);
 
-              await context.read<AuthProvider>().logout();
+      //         await context.read<AuthProvider>().logout();
 
-              navigator.pushReplacementNamed("/login");
-            },
-          ),
-        ],
-      ),
-
+      //         navigator.pushReplacementNamed("/login");
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: IndexedStack(
         index: _currentIndex,
         children: const [

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grad_project/features/home/widgets/today_metric_card.dart';
 import 'package:provider/provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
@@ -24,35 +25,54 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60),
+        preferredSize: Size.fromHeight(80),
         child: AppBar(
           elevation: 0,
           backgroundColor: Colors.transparent,
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Good morning, ${auth.user?.name ?? "Rep"}",
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          flexibleSpace: Container(
+            padding: EdgeInsets.only(left: 24, right: 24, bottom: 10),
+            alignment: Alignment.bottomLeft,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Good morning, ${auth.user?.name ?? "Rep"}",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      "Thursday, Oct 12 • Central Route",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                "Thursday, Oct 12 • Central Route",
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-              ),
-            ],
-          ),
-          centerTitle: false,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 24),
-              child: Icon(Icons.notifications_active),
+
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.notifications_active_outlined,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
 
@@ -66,33 +86,6 @@ class HomeScreen extends StatelessWidget {
             // ---------------------------
             TodayMetricCard(),
 
-            // _metricCard(
-            //   title: "Visits Done",
-            //   value: "12 / 18",
-            //   subtitle: "66% complete",
-            //   icon: Icons.location_on,
-            //   color: Colors.blue,
-            // ),
-
-            // const SizedBox(height: 12),
-
-            // _metricCard(
-            //   title: "Total Sales",
-            //   value: "\$4,320",
-            //   subtitle: "Target: \$5,000",
-            //   icon: Icons.attach_money,
-            //   color: Colors.green,
-            // ),
-
-            // const SizedBox(height: 12),
-
-            // _metricCard(
-            //   title: "Commission",
-            //   value: "\$86.40",
-            //   subtitle: "\$113.60 to Tier 2",
-            //   icon: Icons.trending_up,
-            //   color: Colors.orange,
-            // ),
             const SizedBox(height: 24),
 
             // Motivational message
@@ -125,95 +118,141 @@ class HomeScreen extends StatelessWidget {
             // ---------------------------
             // ACTION BUTTONS
             // ---------------------------
-            _primaryButton(
-              label: "Start Workday",
-              icon: null,
-              color: Colors.blue,
-              onPressed: workdayProvider.isWorkdayActive
-                  ? null
-                  : () {
-                      workdayProvider.startWorkday();
-                    },
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.play_arrow_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                label: Text(
+                  "Start Today's Plan",
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade400,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ),
-
             const SizedBox(height: 12),
 
-            _primaryButton(
-              label: "Start Foreground GPS Test",
-              icon: Icons.play_arrow,
-              color: Colors.deepPurple,
-              onPressed: () {
-                final gpsService = context.read<GpsBackgroundService>();
-                gpsService.startForegroundTest();
-              },
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.exit_to_app_outlined,
+                  color: Colors.grey.shade700,
+                  size: 22,
+                ),
+                label: Text(
+                  "Finish Day & Clear Stock",
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ),
 
-            const SizedBox(height: 12),
+            // _primaryButton(
+            //   label: "Start Workday",
+            //   icon: null,
+            //   color: Colors.blue,
+            //   onPressed: workdayProvider.isWorkdayActive
+            //       ? null
+            //       : () {
+            //           workdayProvider.startWorkday();
+            //         },
+            // ),
 
-            _primaryButton(
-              label: "Stop Foreground GPS Test",
-              icon: Icons.play_arrow,
-              color: Colors.deepPurple,
-              onPressed: () {
-                final gpsService = context.read<GpsBackgroundService>();
-                gpsService.stopForegroundTest();
-              },
-            ),
+            // const SizedBox(height: 12),
 
-            const SizedBox(height: 12),
+            // _primaryButton(
+            //   label: "Start Foreground GPS Test",
+            //   icon: Icons.play_arrow,
+            //   color: Colors.deepPurple,
+            //   onPressed: () {
+            //     final gpsService = context.read<GpsBackgroundService>();
+            //     gpsService.startForegroundTest();
+            //   },
+            // ),
 
-            _primaryButton(
-              label: "Load Today's Plan",
-              icon: Icons.play_arrow,
-              color: Colors.deepPurple,
-              onPressed: () async {
-                await customerProvider.loadCustomers();
-                final success = await vanStockProvider.loadVanStock(repId);
+            // const SizedBox(height: 12),
 
-                if (!context.mounted) return;
+            // _primaryButton(
+            //   label: "Stop Foreground GPS Test",
+            //   icon: Icons.play_arrow,
+            //   color: Colors.deepPurple,
+            //   onPressed: () {
+            //     final gpsService = context.read<GpsBackgroundService>();
+            //     gpsService.stopForegroundTest();
+            //   },
+            // ),
 
-                final message = success
-                    ? "Van stock loaded successfully!"
-                    : "Failed to load van stock";
+            // const SizedBox(height: 12),
 
-                final color = success ? Colors.green : Colors.red;
+            // _primaryButton(
+            //   label: "Load Today's Plan",
+            //   icon: Icons.play_arrow,
+            //   color: Colors.deepPurple,
+            //   onPressed: () async {
+            //     await customerProvider.loadCustomers();
+            //     final success = await vanStockProvider.loadVanStock(repId);
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(message), backgroundColor: color),
-                );
-              },
-            ),
+            //     if (!context.mounted) return;
 
-            const SizedBox(height: 12),
+            //     final message = success
+            //         ? "Van stock loaded successfully!"
+            //         : "Failed to load van stock";
 
-            _primaryButton(
-              label: "Load Today's Plan",
-              icon: Icons.play_arrow,
-              color: Colors.deepPurple,
-              onPressed: () {
-                final gpsRepo = context.read<GpsRepository>();
-                final points = gpsRepo.getUnsyncedPoints();
+            //     final color = success ? Colors.green : Colors.red;
 
-                print("---- GPS POINTS IN HIVE ----");
-                for (final p in points) {
-                  print("${p.lat}, ${p.lng} at ${p.timestamp}");
-                }
-              },
-            ),
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(content: Text(message), backgroundColor: color),
+            //     );
+            //   },
+            // ),
 
-            const SizedBox(height: 12),
+            // const SizedBox(height: 12),
 
-            _primaryButton(
-              label: "Finish Day & Clear Stock",
-              icon: Icons.check_circle,
-              color: Colors.redAccent,
-              onPressed: () {
-                workdayProvider.endWorkday();
-                customerProvider.resetCustomers();
-                vanStockProvider.resetStock();
-              },
-            ),
+            // _primaryButton(
+            //   label: "Load Today's Plan",
+            //   icon: Icons.play_arrow,
+            //   color: Colors.deepPurple,
+            //   onPressed: () {
+            //     final gpsRepo = context.read<GpsRepository>();
+            //     final points = gpsRepo.getUnsyncedPoints();
 
+            //     print("---- GPS POINTS IN HIVE ----");
+            //     for (final p in points) {
+            //       print("${p.lat}, ${p.lng} at ${p.timestamp}");
+            //     }
+            //   },
+            // ),
+
+            // const SizedBox(height: 12),
+
+            // _primaryButton(
+            //   label: "Finish Day & Clear Stock",
+            //   icon: Icons.check_circle,
+            //   color: Colors.redAccent,
+            //   onPressed: () {
+            //     workdayProvider.endWorkday();
+            //     customerProvider.resetCustomers();
+            //     vanStockProvider.resetStock();
+            //   },
+            // ),
             const SizedBox(height: 24),
 
             // ---------------------------
@@ -291,58 +330,6 @@ class HomeScreen extends StatelessWidget {
   // WIDGET HELPERS
   // ---------------------------
 
-  // Widget _metricCard({
-  //   required String title,
-  //   required String value,
-  //   required String subtitle,
-  //   required IconData icon,
-  //   required Color color,
-  // }) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(14),
-  //       boxShadow: [
-  //         BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-  //       ],
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         CircleAvatar(
-  //           radius: 22,
-  //           backgroundColor: color.withValues(alpha: 0.15),
-  //           child: Icon(icon, color: color, size: 24),
-  //         ),
-  //         const SizedBox(width: 16),
-  //         Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               title,
-  //               style: const TextStyle(
-  //                 fontSize: 15,
-  //                 fontWeight: FontWeight.w600,
-  //               ),
-  //             ),
-  //             Text(
-  //               value,
-  //               style: const TextStyle(
-  //                 fontSize: 18,
-  //                 fontWeight: FontWeight.bold,
-  //               ),
-  //             ),
-  //             Text(
-  //               subtitle,
-  //               style: const TextStyle(fontSize: 13, color: Colors.black54),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _primaryButton({
     required String label,
     required IconData? icon,
@@ -388,7 +375,11 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
           ),
           Text(
             value,

@@ -18,39 +18,56 @@ class NavigationInfoBox extends StatelessWidget {
     //   return const SizedBox.shrink();
     // }
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6)],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          distance == null
-              ? const SizedBox.shrink()
-              : Text(
-                  "Distance: ${(distance! / 1000).toStringAsFixed(2)} km",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            distance == null
+                ? const SizedBox.shrink()
+                : Row(
+                    children: [
+                      Icon(Icons.route_outlined, color: Colors.white, size: 18),
+                      SizedBox(width: 5),
+
+                      Text(
+                        "Distance: ${(distance! / 1000).toStringAsFixed(2)} km",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-          distance == null
-              ? const SizedBox.shrink()
-              : Text(
-                  "ETA: ${(duration! / 60).toStringAsFixed(0)} min",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            distance == null
+                ? const SizedBox.shrink()
+                : Text(
+                    " • ETA: ${(duration! / 60).toStringAsFixed(0)} min",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-          GestureDetector(
-            onTap: onCancel,
-            child: const Icon(Icons.close, color: Colors.red, size: 22),
-          ),
-        ],
+
+            Padding(
+              padding: distance != null
+                  ? const EdgeInsets.only(left: 8.0)
+                  : EdgeInsets.zero,
+              child: GestureDetector(
+                onTap: onCancel,
+                child: const Icon(Icons.close, color: Colors.red, size: 22),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

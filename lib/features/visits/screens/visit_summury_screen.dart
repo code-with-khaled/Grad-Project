@@ -57,67 +57,188 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Visit In Progress"),
+        title: Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple.shade50,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              "Visit In Progress",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.deepPurple.shade400,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
         leading: IconButton(icon: Icon(Icons.close), onPressed: _cancelVisit),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               widget.customer.name,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 6),
-            Text("Visit Order: ${widget.order}"),
-
-            SizedBox(height: 20),
-
             Row(
               children: [
-                Icon(Icons.timer, size: 28),
-                SizedBox(width: 8),
-                Text(
-                  _formatTime(_seconds),
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: Colors.grey.shade700,
+                ),
+                SizedBox(width: 6),
+
+                Expanded(
+                  child: Text(
+                    widget.customer.address,
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
                 ),
               ],
             ),
 
+            SizedBox(height: 20),
+
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.fiber_manual_record,
+                        size: 12,
+                        color: Colors.red,
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        "Live Visit Active",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.timer, size: 28),
+                      SizedBox(width: 8),
+                      Text(
+                        _formatTime(_seconds),
+                        style: TextStyle(
+                          fontSize: 38,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+
+                  Text(
+                    "Started at ${widget.visit.startTime.toLocal().toString().substring(11, 19)}",
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
+                ],
+              ),
+            ),
+
             SizedBox(height: 30),
 
-            Text(
-              "Notes (coming soon)",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-
-            ElevatedButton(
-              child: Text("Create Invoice"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => InvoiceCreateScreen(visit: widget.visit),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Invoices",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                    fontSize: 18,
                   ),
-                );
-              },
+                ),
+
+                SizedBox(
+                  height: 35,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              InvoiceCreateScreen(visit: widget.visit),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.receipt_long_outlined,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    label: Text(
+                      "Add Invoice",
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
-            Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EPODScreen(visit: widget.visit),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EPODScreen(visit: widget.visit),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  );
-                },
-                child: Text("Finish Visit"),
+                  ),
+                  child: Text(
+                    "Finish Visit & Resume",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

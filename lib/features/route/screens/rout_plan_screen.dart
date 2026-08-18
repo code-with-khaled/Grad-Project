@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -188,7 +190,6 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
         _fitOnce = true;
       });
     } catch (e) {
-      // ignore: avoid_print
       print('Error fitting map: $e');
       // Fallback: just center on user location
 
@@ -219,26 +220,45 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
       _locationTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
         if (!mounted) return;
 
-        try {
-          await userLocationProvider.update();
-
-          if (!_isNavigating || _selectedCustomer == null) return;
-
-          final current = userLocationProvider.current;
-          if (current == null) return;
-
-          // if (mounted) {
-          //   await routeProvider.getNavigationRoute(
-          //     current,
-          //     LatLng(_selectedCustomer!.lat, _selectedCustomer!.lng),
-          //   );
-          // }ge
-        } catch (e) {
-          // ignore: avoid_print
-          print('Error in location timer: $e');
-        }
+        _runNavigationTick();
       });
     });
+  }
+
+  Future<void> _runNavigationTick() async {
+    print("TIMER FIRED");
+
+    try {
+      print("UPDATE START");
+      await userLocationProvider.update();
+      print("UPDATE END");
+
+      print("AFTER UPDATE");
+
+      print(
+        "_isNavigating: $_isNavigating, _selectedCustomer: $_selectedCustomer",
+      );
+
+      if (!_isNavigating || _selectedCustomer == null) {
+        print("NOT NAVIGATING");
+        return;
+      }
+
+      final current = userLocationProvider.current;
+      if (current == null) {
+        print("CURRENT IS NULL");
+        return;
+      }
+
+      print("TIMER: WILL CALL ROUTE");
+      await routeProvider.getNavigationRoute(
+        current,
+        LatLng(_selectedCustomer!.lat, _selectedCustomer!.lng),
+      );
+      print("TIMER: DONE ROUTE");
+    } catch (e) {
+      print('Error in location timer: $e');
+    }
   }
 
   @override
@@ -374,6 +394,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
               customer: _nextCustomer!,
               order: customerProvider.customers.indexOf(_nextCustomer!) + 1,
               onNavigate: () async {
+                print("BUTTON: WILL CALL ROUTE");
                 final currentUserLoc = userLocationProvider.current;
                 final customer = _nextCustomer;
 
@@ -392,7 +413,6 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                     LatLng(customer.lat, customer.lng),
                   );
                 } catch (e) {
-                  // ignore: avoid_print
                   print('Error getting navigation route: $e');
                 }
               },
@@ -430,7 +450,6 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                     ),
                   );
                 } catch (e) {
-                  // ignore: avoid_print
                   print('Error starting visit: $e');
                 }
               },
@@ -442,8 +461,8 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
             ),
 
           Positioned(
-            top: _isNavigating ? 70 : 16,
-            right: 16,
+            bottom: 240,
+            right: 8,
             child: FloatingActionButton.small(
               heroTag: "recenter",
               onPressed: () {
@@ -453,7 +472,9 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
                 _tryFitMap();
               },
-              child: const Icon(Icons.my_location),
+              splashColor: Colors.deepPurple.shade300,
+              backgroundColor: Colors.white,
+              child: const Icon(Icons.my_location, color: Colors.black),
             ),
           ),
         ],

@@ -26,6 +26,8 @@ class DirectionsService {
       body: jsonEncode(body),
     );
 
+    print("ORS RESPONSE: ${response.statusCode}");
+
     if (response.statusCode == 429) {
       print("ORS ERROR: ${response.statusCode}");
       print("ORS BODY: ${response.body}");
