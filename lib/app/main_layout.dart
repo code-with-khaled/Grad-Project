@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 // import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/customers/screens/customer_list_screen.dart';
 import 'package:grad_project/features/home/screens/home_screen.dart';
-import 'package:grad_project/features/invoices/screens/invoices_screen.dart';
+// import 'package:grad_project/features/invoices/screens/invoices_screen.dart';
+import 'package:grad_project/features/profile/screens/profile_screen.dart';
 import 'package:grad_project/features/route/screens/rout_plan_screen.dart';
 import 'package:grad_project/features/visits/screens/visits_screen.dart';
 // import 'package:provider/provider.dart';
@@ -42,7 +43,8 @@ class _MainLayoutState extends State<MainLayout> {
           RoutePlanScreen(),
           CustomerListScreen(),
           VisitsScreen(),
-          InvoicesScreen(),
+          // InvoicesScreen(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -73,10 +75,15 @@ class _MainLayoutState extends State<MainLayout> {
             selectedIcon: Icon(Icons.check_circle),
             label: "Visits",
           ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.receipt_long_outlined),
+          //   selectedIcon: Icon(Icons.receipt_long),
+          //   label: "Invoices",
+          // ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: "Invoices",
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: "Profile",
           ),
         ],
       ),

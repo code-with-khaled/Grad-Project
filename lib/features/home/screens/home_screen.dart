@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grad_project/features/notifications/screens/notifications_screen.dart';
 import 'package:grad_project/features/home/widgets/today_metric_card.dart';
 import 'package:provider/provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
@@ -63,15 +64,22 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
 
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => NotificationsScreen(),
+                    ),
                   ),
-                  child: Icon(
-                    Icons.notifications_active_outlined,
-                    color: Colors.grey.shade700,
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.notifications_active_outlined,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
                 ),
               ],
