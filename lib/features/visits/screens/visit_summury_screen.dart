@@ -242,10 +242,9 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
 
             Consumer<InvoiceProvider>(
               builder: (context, provider, _) {
-                // ignore: unused_local_variable
                 final invoices = provider.getInvoicesForVisit(widget.visit.id);
 
-                if (dummyInvoices.isEmpty) {
+                if (invoices.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 24),
                     child: Center(
@@ -258,7 +257,7 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
                 }
 
                 return Column(
-                  children: dummyInvoices.map((invoice) {
+                  children: invoices.map((invoice) {
                     return Container(
                       margin: const EdgeInsets.only(top: 12),
                       padding: const EdgeInsets.all(16),
