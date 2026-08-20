@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grad_project/features/notifications/screens/notifications_screen.dart';
 import 'package:grad_project/features/home/widgets/today_metric_card.dart';
+import 'package:grad_project/features/route/providers/route_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
 import 'package:grad_project/features/workday/providers/workday_provider.dart';
-// import 'package:grad_project/features/gps/data/gps_background_service.dart';
-// import 'package:grad_project/features/gps/data/gps_repository.dart';
+import 'package:grad_project/features/gps/data/gps_background_service.dart';
+import 'package:grad_project/features/gps/data/gps_repository.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,12 +21,15 @@ class HomeScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     // ignore: unused_local_variable
     final workdayProvider = context.watch<WorkdayProvider>();
-    // ignore: unused_local_variable
     final customerProvider = context.read<CustomerProvider>();
-    // ignore: unused_local_variable
     final vanStockProvider = context.read<VanStockProvider>();
-    // ignore: unused_local_variable
+    final routeProvider = context.read<RouteProvider>();
     final repId = auth.user?.id ?? 1;
+
+    final fullName = auth.user?.name ?? "";
+    final firstName = fullName.trim().split(" ").first;
+
+    final route = routeProvider.route;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -41,27 +45,31 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Good morning, ${auth.user?.name ?? "Rep"}",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Good morning, $firstName",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                        overflow: TextOverflow.ellipsis, // ⭐ prevents overflow
+                        maxLines: 1, // ⭐ keeps it on one line
                       ),
-                    ),
-                    SizedBox(height: 3),
-                    Text(
-                      "Thursday, Oct 12 • Central Route",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
+                      SizedBox(height: 3),
+                      Text(
+                        "${route!.routeDate} • ${route.name}",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 GestureDetector(
@@ -158,7 +166,11 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               height: 55,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  //     workdayProvider.endWorkday();
+                  //     customerProvider.resetCustomers();
+                  //     vanStockProvider.resetStock();
+                },
                 icon: Icon(
                   Icons.exit_to_app_outlined,
                   color: Colors.grey.shade700,
@@ -177,94 +189,81 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // _primaryButton(
-            //   label: "Start Workday",
-            //   icon: null,
-            //   color: Colors.blue,
-            //   onPressed: workdayProvider.isWorkdayActive
-            //       ? null
-            //       : () {
-            //           workdayProvider.startWorkday();
-            //         },
-            // ),
+            _primaryButton(
+              label: "Start Background GPS Recording",
+              icon: null,
+              color: Colors.blue,
+              onPressed: workdayProvider.isWorkdayActive
+                  ? null
+                  : () {
+                      workdayProvider.startWorkday();
+                    },
+            ),
+            const SizedBox(height: 12),
 
-            // const SizedBox(height: 12),
+            _primaryButton(
+              label: "Start Foreground GPS Test",
+              icon: Icons.play_arrow,
+              color: Colors.red,
+              onPressed: () {
+                final gpsService = context.read<GpsBackgroundService>();
+                gpsService.startForegroundTest();
+              },
+            ),
 
-            // _primaryButton(
-            //   label: "Start Foreground GPS Test",
-            //   icon: Icons.play_arrow,
-            //   color: Colors.deepPurple,
-            //   onPressed: () {
-            //     final gpsService = context.read<GpsBackgroundService>();
-            //     gpsService.startForegroundTest();
-            //   },
-            // ),
+            const SizedBox(height: 12),
 
-            // const SizedBox(height: 12),
+            _primaryButton(
+              label: "Stop Foreground GPS Test",
+              icon: Icons.play_arrow,
+              color: Colors.blue,
+              onPressed: () {
+                final gpsService = context.read<GpsBackgroundService>();
+                gpsService.stopForegroundTest();
+              },
+            ),
 
-            // _primaryButton(
-            //   label: "Stop Foreground GPS Test",
-            //   icon: Icons.play_arrow,
-            //   color: Colors.deepPurple,
-            //   onPressed: () {
-            //     final gpsService = context.read<GpsBackgroundService>();
-            //     gpsService.stopForegroundTest();
-            //   },
-            // ),
+            const SizedBox(height: 12),
 
-            // const SizedBox(height: 12),
+            _primaryButton(
+              label: "Load Today's Plan",
+              icon: Icons.play_arrow,
+              color: Colors.amber,
+              onPressed: () async {
+                await customerProvider.loadCustomers();
+                final success = await vanStockProvider.loadVanStock(repId);
+                await routeProvider.loadTodayRoute();
 
-            // _primaryButton(
-            //   label: "Load Today's Plan",
-            //   icon: Icons.play_arrow,
-            //   color: Colors.deepPurple,
-            //   onPressed: () async {
-            //     await customerProvider.loadCustomers();
-            //     final success = await vanStockProvider.loadVanStock(repId);
+                if (!context.mounted) return;
 
-            //     if (!context.mounted) return;
+                final message = success
+                    ? "Van stock loaded successfully!"
+                    : "Failed to load van stock";
 
-            //     final message = success
-            //         ? "Van stock loaded successfully!"
-            //         : "Failed to load van stock";
+                final color = success ? Colors.green : Colors.red;
 
-            //     final color = success ? Colors.green : Colors.red;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(message), backgroundColor: color),
+                );
+              },
+            ),
 
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       SnackBar(content: Text(message), backgroundColor: color),
-            //     );
-            //   },
-            // ),
+            const SizedBox(height: 12),
 
-            // const SizedBox(height: 12),
+            _primaryButton(
+              label: "Print saved GPS Points",
+              icon: Icons.play_arrow,
+              color: Colors.green,
+              onPressed: () {
+                final gpsRepo = context.read<GpsRepository>();
+                final points = gpsRepo.getUnsyncedPoints();
 
-            // _primaryButton(
-            //   label: "Load Today's Plan",
-            //   icon: Icons.play_arrow,
-            //   color: Colors.deepPurple,
-            //   onPressed: () {
-            //     final gpsRepo = context.read<GpsRepository>();
-            //     final points = gpsRepo.getUnsyncedPoints();
-
-            //     print("---- GPS POINTS IN HIVE ----");
-            //     for (final p in points) {
-            //       print("${p.lat}, ${p.lng} at ${p.timestamp}");
-            //     }
-            //   },
-            // ),
-
-            // const SizedBox(height: 12),
-
-            // _primaryButton(
-            //   label: "Finish Day & Clear Stock",
-            //   icon: Icons.check_circle,
-            //   color: Colors.redAccent,
-            //   onPressed: () {
-            //     workdayProvider.endWorkday();
-            //     customerProvider.resetCustomers();
-            //     vanStockProvider.resetStock();
-            //   },
-            // ),
+                print("---- GPS POINTS IN HIVE ----");
+                for (final p in points) {
+                  print("${p.lat}, ${p.lng} at ${p.timestamp}");
+                }
+              },
+            ),
             const SizedBox(height: 24),
 
             // ---------------------------

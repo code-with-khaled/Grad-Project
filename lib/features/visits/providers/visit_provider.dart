@@ -1,5 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:grad_project/features/visits/data/visit_repository.dart';
 import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -9,12 +12,13 @@ import '../../customers/providers/customer_provider.dart';
 import '../../../core/services/location_service.dart';
 
 class VisitProvider extends ChangeNotifier {
+  final VisitRepository repo;
   final LocationService locationService;
   final Box<VisitHive> _box = Hive.box<VisitHive>('visitsBox');
 
   VisitHive? currentVisit;
 
-  VisitProvider({required this.locationService});
+  VisitProvider({required this.locationService, required this.repo});
 
   List<VisitHive> get allVisits => _box.values.toList();
   List<VisitHive> get completedVisits =>
@@ -63,6 +67,17 @@ class VisitProvider extends ChangeNotifier {
     _box.add(visit);
     currentVisit = visit;
     notifyListeners();
+  }
+
+  // --- CHECK IN ---
+  Future<void> checkIn(int routeId, CustomerHive customer, LatLng gps) async {
+    try {
+      await repo.checkIn(routeId, customer.id, gps.latitude, gps.longitude);
+    } catch (e) {
+      print("Check-in failed: $e");
+    } finally {
+      notifyListeners();
+    }
   }
 
   // --- ATTACH INVOICE ---

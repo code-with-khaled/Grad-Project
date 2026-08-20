@@ -76,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       TextField(
                         controller: _phoneController,
+                        keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           hintText: "Enter your phone number",
                           prefixIcon: const Icon(Icons.phone),
@@ -189,35 +190,35 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                onPressed: () {
-                                  // final username = _phoneController.text.trim();
-                                  // final password = _passwordController.text
-                                  //     .trim();
+                                onPressed: () async {
+                                  final username = _phoneController.text.trim();
+                                  final password = _passwordController.text
+                                      .trim();
 
-                                  // final authProvider = context
-                                  //     .read<AuthProvider>();
-                                  // final navigator = Navigator.of(context);
+                                  final authProvider = context
+                                      .read<AuthProvider>();
+                                  final navigator = Navigator.of(context);
 
-                                  // final success = await authProvider.login(
-                                  //   username,
-                                  //   password,
-                                  // );
-
-                                  // if (!context.mounted) return;
-
-                                  // if (success) {
-                                  //   navigator.pushReplacement(
-                                  //     MaterialPageRoute(
-                                  //       builder: (_) => const MainLayout(),
-                                  //     ),
-                                  //   );
-                                  // }
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const MainLayout(),
-                                    ),
+                                  final success = await authProvider.login(
+                                    username,
+                                    password,
                                   );
+
+                                  if (!context.mounted) return;
+
+                                  if (success) {
+                                    navigator.pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (_) => const MainLayout(),
+                                      ),
+                                    );
+                                  }
+                                  // Navigator.pushReplacement(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (_) => const MainLayout(),
+                                  //   ),
+                                  // );
                                 },
                                 child: const Text(
                                   'Authorize & Sign In',

@@ -8,25 +8,23 @@ class NumberedMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return number != 17 && number != 1
-        ? Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: visited ? Colors.green : Colors.redAccent,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              number.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )
-        : Text("");
+    return Container(
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        color: visited ? Colors.green : Colors.redAccent,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        number.toString(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }

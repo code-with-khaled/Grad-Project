@@ -5,8 +5,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
-import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
+import 'package:grad_project/features/route/providers/route_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
 import 'package:grad_project/features/route/widgets/navigation_info_box.dart';
 import 'package:grad_project/features/route/widgets/route_completed_banner.dart';
@@ -30,8 +30,9 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
   Timer? _locationTimer;
   bool _initialized = false;
-  CustomerProvider? _customerProvider;
-  RoutePlanProvider? _routeProvider;
+  // CustomerProvider? _customerProvider;
+  RoutePlanProvider? _routePlanProvider;
+  RouteProvider? _routeProvider;
   UserLocationProvider? _userLocationProvider;
   bool _isNavigating = false;
   CustomerHive? _selectedCustomer;
@@ -42,12 +43,13 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   DateTime _lastRebuild = DateTime.now();
 
   // Getters to safely access providers
-  CustomerProvider get customerProvider {
-    return _customerProvider ??= context.read<CustomerProvider>();
+
+  RoutePlanProvider get routePlanProvider {
+    return _routePlanProvider ??= context.read<RoutePlanProvider>();
   }
 
-  RoutePlanProvider get routeProvider {
-    return _routeProvider ??= context.read<RoutePlanProvider>();
+  RouteProvider get routeProvider {
+    return _routeProvider ??= context.read<RouteProvider>();
   }
 
   UserLocationProvider get userLocationProvider {
@@ -60,15 +62,15 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
     if (!_initialized) {
       // Initialize providers
-      _customerProvider = context.read<CustomerProvider>();
-      _routeProvider = context.read<RoutePlanProvider>();
+      _routeProvider = context.read<RouteProvider>();
+      _routePlanProvider = context.read<RoutePlanProvider>();
       _userLocationProvider = context.read<UserLocationProvider>();
 
       // Add listener for user location updates
       _userLocationProvider!.addListener(_onUserLocationUpdated);
 
       // Add listener for customer updates
-      _customerProvider!.addListener(_onCustomersUpdated);
+      _routeProvider!.addListener(_onRouteUpdated);
     }
 
     if (_initialized) return;
@@ -117,7 +119,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
     }
   }
 
-  void _onCustomersUpdated() {
+  void _onRouteUpdated() {
     // Check if loading should be complete
     _checkLoadingComplete();
 
@@ -139,7 +141,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
   void _tryFitMap() {
     final userLoc = userLocationProvider.current;
-    final customers = customerProvider.customers;
+    final customers = routeProvider.routeCustomers;
 
     if (userLoc == null || customers.isEmpty || !_mapReady || _fitOnce) {
       return;
@@ -154,7 +156,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
   void _fitUserAndCustomers() {
     final userLoc = userLocationProvider.current;
-    final customers = customerProvider.customers;
+    final customers = routeProvider.routeCustomers;
 
     if (userLoc == null || customers.isEmpty || !_mapReady) {
       return;
@@ -199,7 +201,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
   void _checkLoadingComplete() {
     if (_isLoading &&
-        customerProvider.customers.isNotEmpty &&
+        routeProvider.routeCustomers.isNotEmpty &&
         userLocationProvider.current != null) {
       if (mounted) {
         setState(() {
@@ -251,7 +253,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
       }
 
       print("TIMER: WILL CALL ROUTE");
-      await routeProvider.getNavigationRoute(
+      await routePlanProvider.getNavigationRoute(
         current,
         LatLng(_selectedCustomer!.lat, _selectedCustomer!.lng),
       );
@@ -270,8 +272,8 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
       _userLocationProvider!.removeListener(_onUserLocationUpdated);
     }
 
-    if (_customerProvider != null) {
-      _customerProvider!.removeListener(_onCustomersUpdated);
+    if (_routeProvider != null) {
+      _routeProvider!.removeListener(_onRouteUpdated);
     }
 
     super.dispose();
@@ -280,7 +282,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   CustomerHive? get _nextCustomer {
     if (_manualNextCustomer != null) return _manualNextCustomer;
 
-    for (final c in customerProvider.customers) {
+    for (final c in routeProvider.routeCustomers) {
       if (!c.visited) return c;
     }
     return null;
@@ -294,11 +296,11 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final customers = customerProvider.customers;
+    final routeCustomers = context.watch<RouteProvider>().routeCustomers;
 
-    final visitedCount = customers.where((c) => c.visited).length;
+    final visitedCount = routeCustomers.where((c) => c.visited).length;
 
-    final totalCount = customers.length;
+    final totalCount = routeCustomers.length;
 
     final routeCompleted = totalCount > 0 && visitedCount == totalCount;
 
@@ -348,9 +350,9 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
         children: [
           RouteMap(
             mapController: _mapController,
-            customers: customers,
+            customers: routeCustomers,
             userLocation: userLocationProvider.current,
-            navigationRoute: routeProvider.navigationRoute,
+            navigationRoute: routePlanProvider.navigationRoute,
             onMapReady: () {
               setState(() => _mapReady = true);
 
@@ -367,21 +369,21 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
           ),
 
           // Navigation info box
-          if (routeProvider.navigationRoute.isNotEmpty || _isNavigating)
+          if (routePlanProvider.navigationRoute.isNotEmpty || _isNavigating)
             Positioned(
               top: 20,
               left: 20,
               right: 20,
               child: NavigationInfoBox(
-                distance: routeProvider.navigationDistance,
-                duration: routeProvider.navigationDuration,
+                distance: routePlanProvider.navigationDistance,
+                duration: routePlanProvider.navigationDuration,
                 onCancel: () {
                   setState(() {
                     _isNavigating = false;
                     _selectedCustomer = null;
                   });
 
-                  routeProvider.clearNavigation();
+                  routePlanProvider.clearNavigation();
                 },
               ),
             ),
@@ -398,7 +400,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
           if (_nextCustomer != null)
             NextCustomerCard(
               customer: _nextCustomer!,
-              order: customerProvider.customers.indexOf(_nextCustomer!) + 1,
+              order: routeProvider.routeCustomers.indexOf(_nextCustomer!) + 1,
               onNavigate: () async {
                 print("BUTTON: WILL CALL ROUTE");
                 final currentUserLoc = userLocationProvider.current;
@@ -414,7 +416,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 });
 
                 try {
-                  await routeProvider.getNavigationRoute(
+                  await routePlanProvider.getNavigationRoute(
                     currentUserLoc,
                     LatLng(customer.lat, customer.lng),
                   );
@@ -427,7 +429,8 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 final navigator = Navigator.of(context);
 
                 final customer = _nextCustomer!;
-                final order = customerProvider.customers.indexOf(customer) + 1;
+                final order =
+                    routeProvider.routeCustomers.indexOf(customer) + 1;
 
                 // final ok = await visitProvider.canStartVisit(customer);
 
@@ -452,6 +455,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                         customer: customer,
                         order: order,
                         visit: visitProvider.currentVisit!,
+                        route: routeProvider.route!,
                       ),
                     ),
                   );

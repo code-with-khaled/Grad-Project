@@ -36,19 +36,23 @@ class VisitDto {
   });
 
   factory VisitDto.fromJson(Map<String, dynamic> json) {
+    final strLoc = json["checkInLocation"]?.split(",");
+    final srtLat = strLoc != null ? double.parse(strLoc[0]) : 0.0;
+    final strLng = strLoc != null ? double.parse(strLoc[1]) : 0.0;
+
+    final endLoc = json["checkOutLocation"]?.split(",");
+    final endLat = endLoc != null ? double.parse(strLoc[0]) : 0.0;
+    final endLng = endLoc != null ? double.parse(strLoc[1]) : 0.0;
+
     return VisitDto(
       id: json["id"],
       customerId: json["customerId"],
       startTime: DateTime.parse(json["startTime"]),
-      startLat: (json["startLat"] as num).toDouble(),
-      startLng: (json["startLng"] as num).toDouble(),
+      startLat: srtLat,
+      startLng: strLng,
       endTime: json["endTime"] != null ? DateTime.parse(json["endTime"]) : null,
-      endLat: json["endLat"] != null
-          ? (json["endLat"] as num).toDouble()
-          : null,
-      endLng: json["endLng"] != null
-          ? (json["endLng"] as num).toDouble()
-          : null,
+      endLat: endLat,
+      endLng: endLng,
       status: json["status"],
       signatureUrl: json["signatureUrl"],
       photoUrl: json["photoUrl"],

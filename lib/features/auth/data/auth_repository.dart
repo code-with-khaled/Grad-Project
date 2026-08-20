@@ -2,8 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:grad_project/core/network/error_handler.dart';
 import 'package:grad_project/core/storage/token_storage.dart';
 import 'package:grad_project/features/auth/models/login_result.dart';
-import 'package:grad_project/features/auth/models/user.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'auth_api_service.dart';
 import 'auth_dto.dart';
 
@@ -15,27 +13,18 @@ class AuthRepository {
 
   Future<LoginResult> login(String username, String password) async {
     try {
-      final dto = LoginRequestDto(username: username, password: password);
+      final dto = LoginRequestDto(phoneNumber: username, password: password);
       final result = await _api.login(dto);
 
       await _storage.saveToken(result.token);
       await _storage.saveRefreshToken(result.refreshToken);
       await _storage.saveRepId(result.repId);
 
-      // Decode JWT to extract user info
-      final payload = JwtDecoder.decode(result.token);
-
-      final user = User(
-        id: payload["userId"],
-        phone: payload["sub"],
-        role: payload["role"],
-      );
-
       return LoginResult(
         token: result.token,
         refreshToken: result.refreshToken,
         repId: result.repId,
-        user: user,
+        user: result.user,
       );
     } catch (e) {
       if (e is DioException) {

@@ -9,7 +9,7 @@ class Endpoints {
   static String customerById(int id) => "/customers/$id";
 
   // Route plan
-  static String routeToday(int repId) => "/routes/representative/$repId/today";
+  static String routeToday = "/routes/me";
   static String optimizeRoute(int routeId) => "/routes/$routeId/optimize";
   static String updateRouteOrder(int routeId) =>
       "/routes/$routeId/ordered-customer-ids";

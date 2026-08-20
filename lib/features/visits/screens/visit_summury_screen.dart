@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:grad_project/core/services/location_service.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
+import 'package:grad_project/features/route/models/route_hive.dart';
 import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/invoices/screens/invoice_create_screen.dart';
@@ -14,12 +16,14 @@ class VisitSummaryScreen extends StatefulWidget {
   final CustomerHive customer;
   final int order;
   final VisitHive visit;
+  final RouteHive route;
 
   const VisitSummaryScreen({
     super.key,
     required this.customer,
     required this.order,
     required this.visit,
+    required this.route,
   });
 
   @override
@@ -36,6 +40,22 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
 
     _timer = Timer.periodic(Duration(seconds: 1), (_) {
       setState(() => _seconds++);
+    });
+
+    // Perform check-in
+    Future.microtask(() async {
+      if (!mounted) return;
+
+      final visitProvider = context.read<VisitProvider>();
+      final gps = await LocationService.getCurrentLocation();
+
+      if (!mounted) return;
+
+      await visitProvider.checkIn(
+        widget.route.id, // ⭐ routeId from RouteHive
+        widget.customer, // ⭐ customer
+        gps, // ⭐ current location
+      );
     });
   }
 

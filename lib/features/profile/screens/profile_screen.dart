@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grad_project/features/auth/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: PreferredSize(
@@ -290,12 +299,30 @@ class ProfileScreen extends StatelessWidget {
               width: double.infinity,
               height: 55,
               child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.logout, color: Colors.white, size: 22),
-                label: Text(
-                  "Logout",
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
+                onPressed: () async {
+                  if (authProvider.isLoading) return;
+
+                  final navigator = Navigator.of(context);
+
+                  await authProvider.logout();
+
+                  navigator.pushNamedAndRemoveUntil("/login", (route) => false);
+                },
+                icon: authProvider.isLoading
+                    ? null
+                    : Icon(Icons.logout, color: Colors.white, size: 22),
+                label: authProvider.isLoading
+                    ? CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 1,
+                      )
+                    : Text(
+                        "Logout",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   shape: RoundedRectangleBorder(

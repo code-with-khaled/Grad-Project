@@ -18,12 +18,19 @@ import 'package:grad_project/features/invoices/models/invoice_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
 import 'package:grad_project/features/auth/providers/auth_provider.dart';
+import 'package:grad_project/features/route/data/route_api_service.dart';
+import 'package:grad_project/features/route/data/route_repository.dart';
+import 'package:grad_project/features/route/models/route_hive.dart';
+import 'package:grad_project/features/route/models/route_stop_hive.dart';
 import 'package:grad_project/features/route/providers/route_plan_provider.dart';
+import 'package:grad_project/features/route/providers/route_provider.dart';
 import 'package:grad_project/features/route/providers/user_location_provider.dart';
 import 'package:grad_project/features/van_stock/data/van_stock_api_service.dart';
 import 'package:grad_project/features/van_stock/data/van_stock_repository.dart';
 import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
 import 'package:grad_project/features/van_stock/providers/van_stock_provider.dart';
+import 'package:grad_project/features/visits/data/visit_api_service.dart';
+import 'package:grad_project/features/visits/data/visit_repository.dart';
 import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/auth/screens/login_screen.dart';
@@ -40,6 +47,8 @@ void main() async {
   // Register Hive adapters
   Hive.registerAdapter(CustomerHiveAdapter());
   Hive.registerAdapter(VanStockHiveAdapter());
+  Hive.registerAdapter(RouteHiveAdapter());
+  Hive.registerAdapter(RouteStopHiveAdapter());
   Hive.registerAdapter(InvoiceHiveAdapter());
   Hive.registerAdapter(InvoiceItemHiveAdapter());
   Hive.registerAdapter(VisitHiveAdapter());
@@ -49,8 +58,9 @@ void main() async {
   final authBox = await Hive.openBox(HiveBoxes.authBox);
   final customerBox = await Hive.openBox<CustomerHive>(HiveBoxes.customers);
   final vanstockBox = await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
+  final routeBox = await Hive.openBox<RouteHive>(HiveBoxes.routes);
   await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
-  await Hive.openBox<VisitHive>(HiveBoxes.visits);
+  final visitBox = await Hive.openBox<VisitHive>(HiveBoxes.visits);
   final gpsBox = await Hive.openBox<GpsPointHive>(HiveBoxes.gpsPoints);
 
   // Network layer
@@ -78,6 +88,14 @@ void main() async {
   final vanstockApi = VanStockApiService(dio);
   final vanstockRepo = VanStockRepository(vanstockApi, vanstockBox);
 
+  // Route Plan
+  final routeApi = RouteApiService(dio);
+  final routeRepo = RouteRepository(routeApi, routeBox);
+
+  // Visits
+  final visitApi = VisitApiService(dio);
+  final visitRepo = VisitRepository(visitApi, visitBox);
+
   runApp(
     MultiProvider(
       providers: [
@@ -95,7 +113,15 @@ void main() async {
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
         ChangeNotifierProvider(
-          create: (_) => VisitProvider(locationService: LocationService()),
+          create: (context) =>
+              RouteProvider(routeRepo, context.read<CustomerProvider>()),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => VisitProvider(
+            locationService: LocationService(),
+            repo: visitRepo,
+          ),
         ),
         ChangeNotifierProvider(create: (_) => UserLocationProvider()),
       ],

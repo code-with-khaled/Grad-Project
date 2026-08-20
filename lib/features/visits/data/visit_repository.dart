@@ -9,13 +9,21 @@ class VisitRepository {
 
   VisitRepository(this._api, this._box);
 
-  Future<VisitHive> checkIn(int customerId, double lat, double lng) async {
-    final dto = await _api.checkIn(customerId: customerId, lat: lat, lng: lng);
+  Future<void> checkIn(
+    int routeId,
+    int customerId,
+    double lat,
+    double lng,
+  ) async {
+    final timestamp = formatTimestamp(DateTime.now());
 
-    final hive = dto.toHive();
-    _box.put(hive.id, hive);
-
-    return hive;
+    await _api.checkIn(
+      routeId: routeId,
+      customerId: customerId,
+      lat: lat,
+      lng: lng,
+      time: timestamp,
+    );
   }
 
   Future<VisitHive> checkOut(int visitId, double lat, double lng) async {
@@ -67,5 +75,18 @@ class VisitRepository {
       visit.notes = notes;
       await visit.save();
     }
+  }
+
+  String formatTimestamp(DateTime dt) {
+    final withoutMicros = DateTime(
+      dt.year,
+      dt.month,
+      dt.day,
+      dt.hour,
+      dt.minute,
+      dt.second,
+    );
+
+    return "${withoutMicros.toIso8601String()}+03:00";
   }
 }

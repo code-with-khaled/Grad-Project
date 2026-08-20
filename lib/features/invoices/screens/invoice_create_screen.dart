@@ -20,8 +20,8 @@ class InvoiceCreateScreen extends StatefulWidget {
 
 class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
   final List<InvoiceItemHive> _items = [];
-  // final vanItems = context.read<VanStockProvider>().items;
-  final vanItems = [
+
+  final dummyVanItems = [
     VanStockHive(
       id: 1,
       productId: 1,
@@ -51,31 +51,9 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
   @override
   void initState() {
     super.initState();
-    //
-    _tempVanStock = [
-      VanStockHive(
-        id: 1,
-        productId: 1,
-        name: "دارك سادة 85 غرام",
-        sku: "BEV-0041",
-        barcode: "6211960061886",
-        price: 100,
-        unitOfMeasure: "unitOfMeasure",
-        minStockLevel: 1,
-        quantity: 12,
-      ),
-      VanStockHive(
-        id: 2,
-        productId: 2,
-        name: "ميلك لوز 85 غرام",
-        sku: "BEV-0012",
-        barcode: "barcode2",
-        price: 100,
-        unitOfMeasure: "unitOfMeasure",
-        minStockLevel: 1,
-        quantity: 48,
-      ),
-    ];
+
+    final vanItems = context.read<VanStockProvider>().items;
+    _tempVanStock = List.from(vanItems);
   }
 
   double get total =>

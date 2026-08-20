@@ -1,23 +1,34 @@
+// ignore_for_file: avoid_print
+
 import 'package:dio/dio.dart';
-import 'package:grad_project/core/network/api_client.dart';
 import 'package:grad_project/core/network/endpoints.dart';
 import 'visit_dto.dart';
 import 'epod_dto.dart';
 
 class VisitApiService {
-  final Dio _dio = ApiClient.instance;
+  final Dio _dio;
 
-  Future<VisitDto> checkIn({
+  VisitApiService(this._dio);
+
+  Future<void> checkIn({
+    required int routeId,
     required int customerId,
     required double lat,
     required double lng,
+    required String time,
   }) async {
     final response = await _dio.post(
       Endpoints.checkIn,
-      data: {"customerId": customerId, "lat": lat, "lng": lng},
+      data: {
+        "routeId": routeId,
+        "customerId": customerId,
+        "latitude": lat,
+        "longitude": lng,
+        "checkInTime": time,
+      },
     );
 
-    return VisitDto.fromJson(response.data);
+    print(response.data);
   }
 
   Future<VisitDto> checkOut({

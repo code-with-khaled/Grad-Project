@@ -1,10 +1,13 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/foundation.dart';
 import 'package:grad_project/core/services/direction_service.dart';
 import 'package:latlong2/latlong.dart';
 
 class RoutePlanProvider extends ChangeNotifier {
   List<LatLng> routePoints = [];
-  bool isLoading = false;
+  final bool _isLoading = false;
+  bool get isLoading => _isLoading;
   String? errorMessage;
 
   List<LatLng> navigationRoute = [];

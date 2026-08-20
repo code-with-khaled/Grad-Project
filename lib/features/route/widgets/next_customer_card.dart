@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
-import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/route/providers/route_provider.dart';
 import 'package:provider/provider.dart';
 
 class NextCustomerCard extends StatelessWidget {
@@ -21,7 +21,7 @@ class NextCustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final customers = Provider.of<CustomerProvider>(context).customers;
+    final customers = Provider.of<RouteProvider>(context).routeCustomers;
 
     return Positioned(
       left: 0,

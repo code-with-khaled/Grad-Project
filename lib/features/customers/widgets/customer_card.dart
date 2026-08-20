@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
+import 'package:grad_project/features/route/providers/route_provider.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/visits/screens/visit_summury_screen.dart';
 import 'package:grad_project/features/customers/screens/customer_visits_screen.dart';
@@ -27,6 +28,7 @@ class _CustomerCardState extends State<CustomerCard> {
   @override
   Widget build(BuildContext context) {
     final c = widget.c;
+    final route = context.read<RouteProvider>().route;
 
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -118,6 +120,7 @@ class _CustomerCardState extends State<CustomerCard> {
                                     customer: c,
                                     visit: visitProvider.currentVisit!,
                                     order: widget.order + 1,
+                                    route: route!,
                                   ),
                                 ),
                               );
