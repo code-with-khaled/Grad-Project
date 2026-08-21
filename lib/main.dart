@@ -10,10 +10,14 @@ import 'package:grad_project/features/customers/data/customer_repository.dart';
 // import 'package:grad_project/features/auth/services/auth_service.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
 import 'package:grad_project/features/customers/providers/customer_provider.dart';
+import 'package:grad_project/features/ePOD/data/epod_repository.dart';
+import 'package:grad_project/features/ePOD/providers/epod_provider.dart';
 import 'package:grad_project/features/gps/data/gps_api_service.dart';
 import 'package:grad_project/features/gps/data/gps_background_service.dart';
 import 'package:grad_project/features/gps/data/gps_repository.dart';
 import 'package:grad_project/features/gps/models/gps_point_hive.dart';
+import 'package:grad_project/features/invoices/data/invoice_api_service.dart';
+import 'package:grad_project/features/invoices/data/invoice_repository.dart';
 import 'package:grad_project/features/invoices/models/invoice_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
@@ -59,8 +63,8 @@ void main() async {
   final customerBox = await Hive.openBox<CustomerHive>(HiveBoxes.customers);
   final vanstockBox = await Hive.openBox<VanStockHive>(HiveBoxes.vanStock);
   final routeBox = await Hive.openBox<RouteHive>(HiveBoxes.routes);
-  await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
-  final visitBox = await Hive.openBox<VisitHive>(HiveBoxes.visits);
+  final invoiceBox = await Hive.openBox<InvoiceHive>(HiveBoxes.invoices);
+  await Hive.openBox<VisitHive>(HiveBoxes.visits);
   final gpsBox = await Hive.openBox<GpsPointHive>(HiveBoxes.gpsPoints);
 
   // Network layer
@@ -94,7 +98,14 @@ void main() async {
 
   // Visits
   final visitApi = VisitApiService(dio);
-  final visitRepo = VisitRepository(visitApi, visitBox);
+  final visitRepo = VisitRepository(visitApi);
+
+  // Invoices
+  final invoiceApi = InvoiceApiService(dio);
+  final invoiceRepo = InvoiceRepository(invoiceApi, invoiceBox);
+
+  // ePOD
+  final epodRepo = EPODRepository(dio);
 
   runApp(
     MultiProvider(
@@ -110,7 +121,7 @@ void main() async {
         // CORE FEATURES
         ChangeNotifierProvider(create: (_) => CustomerProvider(customerRepo)),
         ChangeNotifierProvider(create: (_) => VanStockProvider(vanstockRepo)),
-        ChangeNotifierProvider(create: (_) => InvoiceProvider()),
+        ChangeNotifierProvider(create: (_) => InvoiceProvider(invoiceRepo)),
         ChangeNotifierProvider(create: (_) => RoutePlanProvider()),
         ChangeNotifierProvider(
           create: (context) =>
@@ -123,6 +134,7 @@ void main() async {
             repo: visitRepo,
           ),
         ),
+        ChangeNotifierProvider(create: (_) => EPODProvider(epodRepo)),
         ChangeNotifierProvider(create: (_) => UserLocationProvider()),
       ],
       child: const MyApp(),

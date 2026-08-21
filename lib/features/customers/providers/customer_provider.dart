@@ -120,6 +120,17 @@ class CustomerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearAll() async {
+    try {
+      await _repo.clearAll();
+      print(_repo.runtimeType);
+      print(_repo);
+    } catch (e) {
+      print("ClearAll failed: $e");
+    }
+    notifyListeners();
+  }
+
   /// END OF DAY: Reset visited flags
   Future<void> resetCustomers() async {
     final all = _repo.getAllLocal();

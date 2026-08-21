@@ -1,15 +1,20 @@
+// ignore_for_file: avoid_print
+
 import 'package:dio/dio.dart';
-import 'package:grad_project/core/network/api_client.dart';
 import 'package:grad_project/core/network/endpoints.dart';
 import 'invoice_dto.dart';
 
 class InvoiceApiService {
-  final Dio _dio = ApiClient.instance;
+  final Dio _dio;
+
+  InvoiceApiService(this._dio);
 
   Future<InvoiceDto> createInvoice(Map<String, dynamic> payload) async {
     final response = await _dio.post(Endpoints.invoices, data: payload);
 
-    return InvoiceDto.fromJson(response.data);
+    print(response.data);
+
+    return InvoiceDto.fromJson(response.data['data']);
   }
 
   Future<InvoiceDto> updateInvoice(int id, Map<String, dynamic> payload) async {

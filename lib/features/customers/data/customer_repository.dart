@@ -33,4 +33,8 @@ class CustomerRepository {
 
     await customer.save();
   }
+
+  Future<void> clearAll() async {
+    await _box.clear();
+  }
 }

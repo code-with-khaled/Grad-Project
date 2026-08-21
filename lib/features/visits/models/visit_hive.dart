@@ -5,7 +5,7 @@ part 'visit_hive.g.dart';
 @HiveType(typeId: 6)
 class VisitHive extends HiveObject {
   @HiveField(0)
-  int id;
+  int? id;
 
   @HiveField(1)
   int customerId;
@@ -56,7 +56,7 @@ class VisitHive extends HiveObject {
   int? invoiceId;
 
   VisitHive({
-    required this.id,
+    this.id,
     required this.customerId,
     required this.startTime,
     required this.startLat,

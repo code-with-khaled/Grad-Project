@@ -200,9 +200,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   }
 
   void _checkLoadingComplete() {
-    if (_isLoading &&
-        routeProvider.routeCustomers.isNotEmpty &&
-        userLocationProvider.current != null) {
+    if (_isLoading && userLocationProvider.current != null) {
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -228,36 +226,22 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
   }
 
   Future<void> _runNavigationTick() async {
-    print("TIMER FIRED");
-
     try {
-      print("UPDATE START");
       await userLocationProvider.update();
-      print("UPDATE END");
-
-      print("AFTER UPDATE");
-
-      print(
-        "_isNavigating: $_isNavigating, _selectedCustomer: $_selectedCustomer",
-      );
 
       if (!_isNavigating || _selectedCustomer == null) {
-        print("NOT NAVIGATING");
         return;
       }
 
       final current = userLocationProvider.current;
       if (current == null) {
-        print("CURRENT IS NULL");
         return;
       }
 
-      print("TIMER: WILL CALL ROUTE");
       await routePlanProvider.getNavigationRoute(
         current,
         LatLng(_selectedCustomer!.lat, _selectedCustomer!.lng),
       );
-      print("TIMER: DONE ROUTE");
     } catch (e) {
       print('Error in location timer: $e');
     }
@@ -400,7 +384,11 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
           if (_nextCustomer != null)
             NextCustomerCard(
               customer: _nextCustomer!,
-              order: routeProvider.routeCustomers.indexOf(_nextCustomer!) + 1,
+              order:
+                  routeProvider.routeCustomers.indexWhere(
+                    (c) => c.id == _nextCustomer!.id,
+                  ) +
+                  1,
               onNavigate: () async {
                 print("BUTTON: WILL CALL ROUTE");
                 final currentUserLoc = userLocationProvider.current;
@@ -429,6 +417,7 @@ class _RoutePlanScreenState extends State<RoutePlanScreen> {
                 final navigator = Navigator.of(context);
 
                 final customer = _nextCustomer!;
+                print("id: ${_nextCustomer!.id} name: ${_nextCustomer!.name}");
                 final order =
                     routeProvider.routeCustomers.indexOf(customer) + 1;
 

@@ -20,7 +20,7 @@ class Endpoints {
   static const visits = "/visits";
 
   // EPOD (file upload)
-  static const uploadFile = "/files/upload";
+  static const uploadFile = "/invoices/epod-uploads";
 
   // Invoices
   static const invoices = "/invoices";

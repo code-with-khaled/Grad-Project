@@ -6,9 +6,9 @@ class ApiClient {
   static final Dio _dio = Dio(
     BaseOptions(
       baseUrl: "https://hardly-garbage-tacky.ngrok-free.dev/api",
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-      sendTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 20),
       contentType: "application/json",
     ),
   );

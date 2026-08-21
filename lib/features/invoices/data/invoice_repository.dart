@@ -16,7 +16,8 @@ class InvoiceRepository {
     final payload = {
       "customerId": customerId,
       "visitId": visitId,
-      "items": items,
+      "clientUuid": null,
+      "lines": items,
     };
 
     final dto = await _api.createInvoice(payload);

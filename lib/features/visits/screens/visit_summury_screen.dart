@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:grad_project/core/services/location_service.dart';
 import 'package:grad_project/features/customers/models/customer_hive.dart';
+import 'package:grad_project/features/customers/providers/customer_provider.dart';
 import 'package:grad_project/features/invoices/models/invoice_hive.dart';
 import 'package:grad_project/features/invoices/models/invoice_item_hive.dart';
 import 'package:grad_project/features/invoices/providers/invoice_provider.dart';
@@ -9,7 +10,6 @@ import 'package:grad_project/features/route/models/route_hive.dart';
 import 'package:grad_project/features/visits/models/visit_hive.dart';
 import 'package:grad_project/features/visits/providers/visit_provider.dart';
 import 'package:grad_project/features/invoices/screens/invoice_create_screen.dart';
-import 'package:grad_project/features/visits/screens/epod_screen.dart';
 import 'package:provider/provider.dart';
 
 class VisitSummaryScreen extends StatefulWidget {
@@ -56,6 +56,12 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
         widget.customer, // ⭐ customer
         gps, // ⭐ current location
       );
+
+      // await visitProvider.setVisitId();
+
+      setState(() {
+        widget.visit.id = visitProvider.currentVisit!.id;
+      });
     });
   }
 
@@ -262,7 +268,21 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
 
             Consumer<InvoiceProvider>(
               builder: (context, provider, _) {
-                final invoices = provider.getInvoicesForVisit(widget.visit.id);
+                final visitId = widget.visit.id;
+
+                if (visitId == null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: Center(
+                      child: Text(
+                        "Visit not checked-in yet...",
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    ),
+                  );
+                }
+
+                final invoices = provider.getInvoicesForVisit(visitId);
 
                 if (invoices.isEmpty) {
                   return Padding(
@@ -387,13 +407,29 @@ class _VisitSummaryScreenState extends State<VisitSummaryScreen> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EPODScreen(visit: widget.visit),
-                ),
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final visitProvider = context.read<VisitProvider>();
+              final customerProvider = context.read<CustomerProvider>();
+              final gps = await LocationService.getCurrentLocation();
+
+              if (!mounted) return;
+
+              await visitProvider.checkOut(
+                widget.route.id, // ⭐ routeId from RouteHive
+                widget.customer, // ⭐ customer
+                gps, // ⭐ current location
               );
+
+              // navigator.push(
+              //   MaterialPageRoute(
+              //     builder: (_) => EPODScreen(visit: widget.visit),
+              //   ),
+              // );
+
+              visitProvider.finishVisit(gps, customerProvider);
+
+              navigator.pop();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

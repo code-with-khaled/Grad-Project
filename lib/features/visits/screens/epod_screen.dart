@@ -1,21 +1,23 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:grad_project/features/visits/screens/visit_completed_screen.dart';
+import 'package:grad_project/features/ePOD/providers/epod_provider.dart';
+import 'package:grad_project/features/route/data/epod_artifact_dto.dart';
+import 'package:grad_project/features/visits/data/epod_payload_dto.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:signature/signature.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/services/location_service.dart';
 import '../providers/visit_provider.dart';
-import '../../customers/providers/customer_provider.dart';
 import '../models/visit_hive.dart';
 
 class EPODScreen extends StatefulWidget {
   final VisitHive visit;
+  final int invoiceId;
 
-  const EPODScreen({super.key, required this.visit});
+  const EPODScreen({super.key, required this.visit, required this.invoiceId});
 
   @override
   State<EPODScreen> createState() => _EPODScreenState();
@@ -28,23 +30,20 @@ class _EPODScreenState extends State<EPODScreen> {
   );
 
   File? _photo;
-  LatLng? _gps;
   final TextEditingController _notes = TextEditingController();
 
   bool _saving = false;
 
   Future<void> _capturePhoto() async {
     final picker = ImagePicker();
-    final img = await picker.pickImage(source: ImageSource.camera);
+    final img = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 10,
+    );
 
     if (img != null) {
       setState(() => _photo = File(img.path));
     }
-  }
-
-  Future<void> _captureGPS() async {
-    final pos = await LocationService.getCurrentLocation();
-    setState(() => _gps = pos);
   }
 
   Future<String> _saveSignatureLocally() async {
@@ -72,13 +71,6 @@ class _EPODScreenState extends State<EPODScreen> {
       return;
     }
 
-    if (_gps == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("GPS location is required")));
-      return;
-    }
-
     setState(() => _saving = true);
 
     try {
@@ -88,41 +80,56 @@ class _EPODScreenState extends State<EPODScreen> {
       if (!mounted) return;
 
       final visitProvider = context.read<VisitProvider>();
-      final customerProvider = context.read<CustomerProvider>();
+      final epodProvider = context.read<EPODProvider>();
+
+      // 1️⃣ Save signature locally
+      final signatureFile = File(signaturePath);
+
+      // 2️⃣ Upload signature → get token
+      final signatureToken = await epodProvider.uploadSignature(signatureFile);
+      print("signaturePath: $signaturePath");
+      print("signatureToken: $signatureToken");
+
+      // 3️⃣ Upload photo → get token
+      final photoToken = await epodProvider.uploadPhoto(_photo!);
+      print("photoPath: $photoPath");
+      print("photoToken: $photoToken");
+
+      // 4️⃣ Build artifacts
+      final artifacts = [
+        EPODArtifactDto(
+          type: "SIGNATURE",
+          fileToken: signatureToken,
+          capturedAt: formatTimestamp(DateTime.now()),
+        ),
+        EPODArtifactDto(
+          type: "DELIVERY_PHOTO",
+          fileToken: photoToken,
+          capturedAt: formatTimestamp(DateTime.now()),
+        ),
+      ];
+
+      // 5️⃣ Build final EPOD payload
+      final dto = EPODPayloadDto(
+        visitId: widget.visit.id!,
+        signatureToken: signatureToken,
+        photoToken: photoToken,
+        notes: _notes.text,
+        artifacts: artifacts,
+      );
+
+      // 6️⃣ Submit EPOD for invoice
+      await epodProvider.submitEPOD(widget.invoiceId, dto);
 
       // Save EPOD fields
       visitProvider.addEPOD(
         signaturePath: signaturePath,
         photoPath: photoPath,
-        deliveryLat: _gps!.latitude,
-        deliveryLng: _gps!.longitude,
         notes: _notes.text,
       );
-
-      // Finish visit
-      visitProvider.finishVisit(_gps!, customerProvider);
-
+    } catch (e) {
       if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => VisitCompletedScreen(
-            data: {
-              "id": widget.visit.id,
-              "customerId": widget.visit.customerId,
-              "startTime": widget.visit.startTime.toIso8601String(),
-              "startLat": widget.visit.startLat,
-              "startLng": widget.visit.startLng,
-              "endTime": DateTime.now().toIso8601String(),
-              "endLat": _gps!.latitude,
-              "endLng": _gps!.longitude,
-              "status": "completed",
-            },
-          ),
-        ),
-      );
-    } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error saving ePOD: $e")));
@@ -177,18 +184,6 @@ class _EPODScreenState extends State<EPODScreen> {
                   ),
             SizedBox(height: 20),
 
-            // GPS
-            Text("GPS Location", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 10),
-            _gps == null
-                ? ElevatedButton.icon(
-                    onPressed: _captureGPS,
-                    icon: Icon(Icons.location_on),
-                    label: Text("Capture GPS"),
-                  )
-                : Text("Captured: ${_gps!.latitude}, ${_gps!.longitude}"),
-            SizedBox(height: 20),
-
             // Notes
             Text("Notes", style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
@@ -216,5 +211,18 @@ class _EPODScreenState extends State<EPODScreen> {
         ),
       ),
     );
+  }
+
+  String formatTimestamp(DateTime dt) {
+    final withoutMicros = DateTime(
+      dt.year,
+      dt.month,
+      dt.day,
+      dt.hour,
+      dt.minute,
+      dt.second,
+    );
+
+    return "${withoutMicros.toIso8601String()}+03:00";
   }
 }

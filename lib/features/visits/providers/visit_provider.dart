@@ -39,7 +39,6 @@ class VisitProvider extends ChangeNotifier {
 
   void startVisit(CustomerHive customer, LatLng gps) {
     final visit = VisitHive(
-      id: _generateId(),
       customerId: customer.id,
       startTime: DateTime.now(),
       startLat: gps.latitude,
@@ -69,12 +68,35 @@ class VisitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setVisitId() async {
+    currentVisit!.id = 2;
+  }
+
   // --- CHECK IN ---
   Future<void> checkIn(int routeId, CustomerHive customer, LatLng gps) async {
     try {
-      await repo.checkIn(routeId, customer.id, gps.latitude, gps.longitude);
+      final visitId = await repo.checkIn(
+        routeId,
+        customer.id,
+        gps.latitude,
+        gps.longitude,
+      );
+
+      currentVisit!.id = visitId;
+      await currentVisit!.save();
     } catch (e) {
       print("Check-in failed: $e");
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  // --- CHECK IN ---
+  Future<void> checkOut(int routeId, CustomerHive customer, LatLng gps) async {
+    try {
+      await repo.checkOut(routeId, customer.id, gps.latitude, gps.longitude);
+    } catch (e) {
+      print("Check-out failed: $e");
     } finally {
       notifyListeners();
     }
@@ -93,8 +115,6 @@ class VisitProvider extends ChangeNotifier {
   void addEPOD({
     required String signaturePath,
     required String photoPath,
-    required double deliveryLat,
-    required double deliveryLng,
     String? notes,
   }) {
     if (currentVisit == null) return;
@@ -102,8 +122,6 @@ class VisitProvider extends ChangeNotifier {
     currentVisit!
       ..signaturePath = signaturePath
       ..photoPath = photoPath
-      ..deliveryLat = deliveryLat
-      ..deliveryLng = deliveryLng
       ..notes = notes
       ..synced = false;
 

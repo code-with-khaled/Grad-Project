@@ -166,10 +166,11 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               height: 55,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  //     workdayProvider.endWorkday();
-                  //     customerProvider.resetCustomers();
-                  //     vanStockProvider.resetStock();
+                onPressed: () async {
+                  workdayProvider.endWorkday();
+                  // customerProvider.resetCustomers();
+                  await customerProvider.clearAll();
+                  await vanStockProvider.resetStock();
                 },
                 icon: Icon(
                   Icons.exit_to_app_outlined,

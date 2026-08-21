@@ -17,7 +17,7 @@ class VisitHiveAdapter extends TypeAdapter<VisitHive> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return VisitHive(
-      id: fields[0] as int,
+      id: fields[0] as int?,
       customerId: fields[1] as int,
       startTime: fields[2] as DateTime,
       startLat: fields[3] as double,

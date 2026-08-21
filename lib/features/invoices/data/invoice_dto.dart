@@ -16,8 +16,8 @@ class InvoiceItemDto {
 
   factory InvoiceItemDto.fromJson(Map<String, dynamic> json) {
     return InvoiceItemDto(
-      itemId: json["itemId"],
-      name: json["name"],
+      itemId: json["productId"],
+      name: json["productName"],
       price: (json["price"] as num).toDouble(),
       quantity: json["quantity"],
     );
@@ -51,14 +51,14 @@ class InvoiceDto {
   });
 
   factory InvoiceDto.fromJson(Map<String, dynamic> json) {
-    final List itemsJson = json["items"] ?? [];
+    final List itemsJson = json["lines"] ?? [];
 
     return InvoiceDto(
       id: json["id"],
       customerId: json["customerId"],
       visitId: json["visitId"],
-      total: (json["total"] as num).toDouble(),
-      createdAt: DateTime.parse(json["createdAt"]),
+      total: (json["totalAmount"] as num).toDouble(),
+      createdAt: DateTime.parse(json["invoiceDate"]),
       items: itemsJson.map((e) => InvoiceItemDto.fromJson(e)).toList(),
     );
   }

@@ -26,7 +26,7 @@ class RouteProvider extends ChangeNotifier {
       todayRoute = await _repo.syncTodayRoute();
     } catch (e) {
       print("Failed to load route: $e");
-      todayRoute = _repo.getTodayRoute();
+      // todayRoute = _repo.getTodayRoute();
     }
 
     _isLoading = false;
@@ -39,9 +39,11 @@ class RouteProvider extends ChangeNotifier {
   List<CustomerHive> get routeCustomers {
     final all = _customerProvider.customers;
 
-    return stops.map((s) {
-      return all.firstWhere((c) => c.id == s.customerId);
-    }).toList();
+    return stops
+        .map((s) => all.where((c) => c.id == s.customerId).toList())
+        .where((list) => list.isNotEmpty)
+        .map((list) => list.first)
+        .toList();
   }
 
   RouteHive? get route => _repo.getTodayRoute();

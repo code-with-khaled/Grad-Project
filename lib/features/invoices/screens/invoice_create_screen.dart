@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/features/invoices/widgets/vanstock_sheet.dart';
 import 'package:grad_project/features/van_stock/models/van_stock_hive.dart';
+import 'package:grad_project/features/visits/screens/epod_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:grad_project/features/visits/models/visit_hive.dart';
@@ -250,10 +251,12 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
     final visitProvider = context.read<VisitProvider>();
     final vanStockProvider = context.read<VanStockProvider>();
 
+    final visitId = widget.visit.id!;
+
     // 1. Create invoice
     final invoiceId = await invoiceProvider.addInvoice(
       customerId: widget.visit.customerId,
-      visitId: widget.visit.id,
+      visitId: visitId,
       items: _items,
     );
 
@@ -267,7 +270,23 @@ class _InvoiceCreateScreenState extends State<InvoiceCreateScreen> {
 
     // 4. Return invoiceId to VisitSummaryScreen
     if (!mounted) return;
-    Navigator.pop(context, invoiceId);
+    // Navigator.pop(context, invoiceId);
+
+    final invoice = await invoiceProvider.createDraftInvoice(
+      customerId: widget.visit.customerId,
+      visitId: visitId,
+      items: _items,
+    );
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            EPODScreen(visit: widget.visit, invoiceId: invoice.id),
+      ),
+    );
   }
 
   @override
